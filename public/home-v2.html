@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Backr - Decentralized Membership Platform</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Playfair+Display:ital,wght@0,700;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#6467f2",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#0D0B1D", // Using the requested Cosmic Ink
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "3xl": "2.5rem", // Requested 3xl for glass cards
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .nebula-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(100, 103, 242, 0.3) 0%, rgba(100, 103, 242, 0) 70%);
+            filter: blur(40px);
+            z-index: -1;
+        }
+        .nebula-magenta {
+            background: radial-gradient(circle, rgba(219, 39, 119, 0.2) 0%, rgba(219, 39, 119, 0) 70%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden">
+<!-- Sticky Navigation -->
+<nav class="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+<div class="max-w-md mx-auto flex items-center justify-between glass-card px-5 py-3 rounded-full">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="text-white font-bold italic">B</span>
+</div>
+<span class="font-bold text-xl tracking-tight">Backr</span>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-full text-sm font-semibold transition-all">
+                Get Started
+            </button>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="relative pt-32 pb-20 px-6 max-w-md mx-auto">
+<!-- Decorative Nebulas -->
+<div class="nebula-glow top-20 -left-20"></div>
+<div class="nebula-glow nebula-magenta top-80 -right-20"></div>
+<!-- Hero Section -->
+<section class="text-center mb-24">
+<h1 class="font-serif text-5xl md:text-6xl mb-6 leading-tight dark:text-white">
+                Empower Your <br/>
+<span class="italic text-primary">Creativity</span>
+</h1>
+<p class="text-slate-400 text-lg mb-10 leading-relaxed px-4">
+                The decentralized membership platform built for the next generation of creators.
+            </p>
+<div class="flex flex-col gap-4 items-center">
+<button class="w-full bg-primary text-white py-5 rounded-full text-lg font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-transform">
+                    Go to Studio
+                </button>
+<button class="w-full glass-card text-white py-5 rounded-full text-lg font-semibold hover:bg-white/10 transition-colors">
+                    Explore Creators
+                </button>
+</div>
+<div class="mt-16 relative">
+<div class="glass-card p-2 rounded-3xl rotate-2">
+<img alt="Creator Dashboard Preview" class="rounded-2xl w-full h-64 object-cover" data-alt="Abstract colorful flowing gradients and patterns" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQKqY25aJGSLVM3UfBH1PIGnhl6FyPzAJJ8lDYgfwSQZrIIfjyAMVBQYVIab1CH4YcahjwRqotjWxEQAUiiovYLj1DHQ4qGb55q_J4bqp2FrHkEjf3SXVsnsI_0xlNZxzh8KsZ5Hsv3k8_OJWd_pGzPWl_o8ujNzoapUxIvf_nvyDzKUI8bs6h6q_8sNXACDswLAkQacTnuWTaT028S32EpJXCdB-iCEPKZygy-Jt9Eo5fs-xTbcD4p97PbfJ-4Y_V22kHBum-R-E"/>
+</div>
+<div class="absolute -bottom-6 -left-4 glass-card p-4 rounded-2xl -rotate-3 border-primary/30">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+<i class="material-icons text-primary text-sm">token</i>
+</div>
+<div class="text-left">
+<p class="text-xs text-slate-400">Total Earned</p>
+<p class="font-bold">12.42 ETH</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- How It Works Section -->
+<section class="mb-24">
+<h2 class="font-serif text-3xl mb-12 text-center">How It Works</h2>
+<div class="flex flex-col gap-6">
+<!-- Step 1 -->
+<div class="glass-card p-8 rounded-3xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<i class="material-icons text-8xl">palette</i>
+</div>
+<div class="bg-primary/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
+<i class="material-icons text-primary">palette</i>
+</div>
+<h3 class="text-xl font-bold mb-2">Create Page</h3>
+<p class="text-slate-400">Customize your space with Web3 native features and unique styling.</p>
+</div>
+<!-- Step 2 -->
+<div class="glass-card p-8 rounded-3xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<i class="material-icons text-8xl">lock</i>
+</div>
+<div class="bg-primary/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
+<i class="material-icons text-primary">lock</i>
+</div>
+<h3 class="text-xl font-bold mb-2">Share Content</h3>
+<p class="text-slate-400">Gate your premium content behind tokens or memberships easily.</p>
+</div>
+<!-- Step 3 -->
+<div class="glass-card p-8 rounded-3xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<i class="material-icons text-8xl">account_balance_wallet</i>
+</div>
+<div class="bg-primary/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
+<i class="material-icons text-primary">account_balance_wallet</i>
+</div>
+<h3 class="text-xl font-bold mb-2">Get Paid</h3>
+<p class="text-slate-400">Receive instant payments from fans worldwide with zero intermediaries.</p>
+</div>
+</div>
+</section>
+<!-- Value Prop Section -->
+<section class="mb-24 py-10">
+<div class="nebula-glow nebula-magenta bottom-0 left-1/2 -translate-x-1/2 opacity-30"></div>
+<h2 class="font-serif text-4xl mb-8 leading-tight">Complete <br/>creative control.</h2>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="mt-1 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+<i class="material-icons text-primary text-sm font-bold">check</i>
+</div>
+<div>
+<h4 class="font-semibold text-lg">No de-platforming</h4>
+<p class="text-slate-400">Your audience belongs to you, secured by the blockchain.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="mt-1 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+<i class="material-icons text-primary text-sm font-bold">check</i>
+</div>
+<div>
+<h4 class="font-semibold text-lg">Direct-to-fan payments</h4>
+<p class="text-slate-400">Bypass payment processors and their high processing fees.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="mt-1 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+<i class="material-icons text-primary text-sm font-bold">check</i>
+</div>
+<div>
+<h4 class="font-semibold text-lg">Ownership of data</h4>
+<p class="text-slate-400">Port your data and social graph anywhere in the ecosystem.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Fees Section -->
+<section class="mb-24">
+<div class="glass-card p-12 rounded-3xl text-center border-primary/40 relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5 -z-10"></div>
+<p class="text-primary font-bold tracking-widest uppercase text-sm mb-4">Platform Fee</p>
+<div class="text-8xl font-serif mb-6 text-white leading-none">5%</div>
+<p class="text-slate-300 text-lg leading-relaxed max-w-xs mx-auto">
+                    Simple, transparent pricing. <br/>
+<span class="text-slate-500">We only succeed if you do.</span>
+</p>
+<div class="mt-10 h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+<p class="mt-6 text-xs text-slate-500 uppercase tracking-tighter">No hidden costs. No monthly subscription.</p>
+</div>
+</section>
+<!-- Footer -->
+<footer class="mt-20 pt-10 border-t border-white/10">
+<div class="flex flex-col items-center gap-8">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 bg-primary/40 rounded flex items-center justify-center">
+<span class="text-white text-xs font-bold italic">B</span>
+</div>
+<span class="font-bold text-lg tracking-tight">Backr</span>
+</div>
+<div class="flex gap-8 text-sm text-slate-400 font-medium">
+<a class="hover:text-primary transition-colors" href="#">About</a>
+<a class="hover:text-primary transition-colors" href="#">Terms</a>
+<a class="hover:text-primary transition-colors" href="#">Twitter</a>
+<a class="hover:text-primary transition-colors" href="#">Discord</a>
+</div>
+<p class="text-xs text-slate-600 mb-10">
+                    © 2024 Backr Protocol. All rights reserved.
+                </p>
+</div>
+</footer>
+</main>
+<!-- Map Spacer Placeholder if needed for visual depth -->
+<div class="hidden" data-location="San Francisco" style=""></div>
+</body></html>

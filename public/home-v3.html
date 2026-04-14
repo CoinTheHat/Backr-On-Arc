@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Backr Light Landing Page</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#8c2bee",
+                "background-light": "#f7f6f8",
+                "background-dark": "#191022",
+                "mist": "#F8F9FC",
+                "fuchsia-accent": "#e879f9",
+              },
+              fontFamily: {
+                "display": ["Inter", "sans-serif"],
+                "serif": ["Playfair Display", "serif"],
+              },
+              borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .mesh-gradient {
+            background-color: #ffffff;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(140, 43, 238, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(232, 121, 249, 0.1) 0px, transparent 50%);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #8c2bee, #e879f9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-white text-slate-900 overflow-x-hidden antialiased">
+<!-- Top Navigation -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-primary/5 px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+<span class="material-icons text-white text-lg">rocket_launch</span>
+</div>
+<span class="text-xl font-bold tracking-tight text-slate-900">Backr</span>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-full font-medium text-sm transition-all active:scale-95 shadow-lg shadow-primary/20">
+            Join Now
+        </button>
+</nav>
+<!-- Hero Section -->
+<section class="pt-32 pb-20 px-6 text-center relative overflow-hidden">
+<div class="relative z-10">
+<h1 class="font-serif text-5xl md:text-6xl text-slate-900 leading-[1.1] mb-6">
+                Your Creative <br/> Galaxy, <span class="italic text-primary">Unleashed.</span>
+</h1>
+<p class="text-slate-500 text-lg mb-10 max-w-xs mx-auto leading-relaxed">
+                The decentralized stage for visionary artists and modern creators.
+            </p>
+<button class="bg-gradient-to-r from-primary to-fuchsia-accent text-white px-8 py-4 rounded-full font-semibold text-lg shadow-xl shadow-primary/25 transition-transform hover:scale-105 active:scale-95">
+                Launch Studio
+            </button>
+</div>
+<div class="mt-16 flex justify-center relative">
+<div class="w-72 h-72 relative floating">
+<div class="absolute inset-0 bg-primary/20 rounded-full blur-3xl"></div>
+<img class="w-full h-full object-contain relative z-10" data-alt="Abstract 3D iridescent floating crystalline sphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCo1uqVl_otMd6lK03qixmwF6GJ7ZST80ZNiXbYe1loYrXJ7ORSNR427MtMHF8Q5Tym4dC-ORHx30KeqiuChj8tYkGqWri0jhVX2IAAdOLPA-PRyXxFPBLyvxr4fbj3CDHdcy3HAmFofphB0Ic6gzihnFi5dc2Mv9pziZ4Kyj1oSU8hXje0sBSQWY20EBMRnOg_ipANiJ_hoH4UzyIqV7-Yh8VCep9lIGEZZG_ok1S6_3XEfZdnoqkNQdc4GGsCZsnT2ACoyImYtkQ"/>
+</div>
+</div>
+</section>
+<!-- Community Marquee -->
+<section class="py-8 bg-mist overflow-hidden border-y border-primary/5">
+<div class="flex gap-4 overflow-x-auto hide-scrollbar px-6 whitespace-nowrap">
+<!-- Avatars with gradient borders -->
+<div class="inline-block p-[2px] rounded-full bg-gradient-to-tr from-primary to-fuchsia-accent shrink-0">
+<img class="w-14 h-14 rounded-full bg-white p-[2px]" data-alt="Creator profile avatar circular" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnb3c1DZZIAR-kIitdd34a3ybNymNMzQc0Q7yEEn2YwkhUdZWyyF5PvdAB1fbEnQAUSq912wTtogW7Rg780LTvqxg9a0qRuz43wMCGAop2bRl5nemS1-YWl90nt9QOefLJrFlVykVd55vVgiMwElWPPbXikCCzYnibc5dwBAwMK1HqcEqc8ofPwKgQjzukInt6h7Q4x_9tIJL29TPo3cLeDVuXVgH1D4buQhsuufL9CPT14xhbNxXlROFx9lpiupuBhAieHOqN0cA"/>
+</div>
+<div class="inline-block p-[2px] rounded-full bg-gradient-to-tr from-fuchsia-accent to-blue-400 shrink-0">
+<img class="w-14 h-14 rounded-full bg-white p-[2px]" data-alt="Creator profile avatar circular" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpVhtZhLwLrjsun0VHLRkuByFDcYvBG4UfEIxtVpWVcbam99HZdSu6ebdQdQGhlTBRA9URKUFGt1FBU-Fs76o_HB95bG22IgNPzf-UFSIMz2wAUJzaXo4MHOSz-2uEqlS-Ip7j8bcu55wGuie7fgjaUOBTMuIvEbjTsmNF0jTz34h2RG63gaD_KRBJobEdtLxFSf8ntlTfUvVClu7S4tLXQpvXTeR0CbrkXBfb-mLHNf4lAw04J0sPx2lAk5TEUs3bidPLrK1Vr3Q"/>
+</div>
+<div class="inline-block p-[2px] rounded-full bg-gradient-to-tr from-blue-400 to-primary shrink-0">
+<img class="w-14 h-14 rounded-full bg-white p-[2px]" data-alt="Creator profile avatar circular" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAE6VfaKhiRoj2JoOEdcE3LV4NMQUdBKoumSSv1lV0Igs_Vi5TWHdqdkYCAOJ0GjBR25JU_B_0luYF1tqkehhiGZkklsTOL59bmkPBsDWYlP1zyEUsr9MQtJsV7osiALTOEzRcxc-9THKlcELicaElGlMEq5_kleqVXGu81b5HQLdB9Z2wxMI--CkUICH70PCGda9RVUUN4EqSPKYNggozpjeP7mq178rj0DLH4dXUgM08rb0Lzqm5uJOykZbiZ6SQZ8GJlew9i2qU"/>
+</div>
+<div class="inline-block p-[2px] rounded-full bg-gradient-to-tr from-primary to-pink-500 shrink-0">
+<img class="w-14 h-14 rounded-full bg-white p-[2px]" data-alt="Creator profile avatar circular" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcoKf1ENVq-woTD8kot1I2Kwq2rgLgF9uKIJ_H4ZKeuVTtjDL2kFgsPiQK0lcNo76YgIhOIoY6PnGdUwGth42u479V8VAXTfAhbXmxnIbdcJ5wOk1cAdhmy26NMe7Si63ThrOYRlQnC_69LGsZAUusuPrdKgaiGOmfap_tKD45-SttnRYvRXgzwqBQ__UG7NJTn0AuFMm_owxEmr8kKkfokTG7AKSIFmOLBE0kM9S2n1hdCs9efGepCLOqJG7L59tDoQ3ZljehGqg"/>
+</div>
+<div class="inline-block p-[2px] rounded-full bg-gradient-to-tr from-orange-400 to-primary shrink-0">
+<img class="w-14 h-14 rounded-full bg-white p-[2px]" data-alt="Creator profile avatar circular" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBspksleLZF31pYvRrwZJ3zIg8qrIUA94EgMVOFqyQ16Rfd6BZ5HnPR8B9Yj27QWpIVu642doPC1-DEpg2qtFZI1DME0sEZTh6nEKBX6bfEt2v1BEPByrPANES8GeqQraqVtB-LRBquU_cvgk3fsgR1hW2qfGmOQ0cGizfd0iYtLEVG4ChiJKInlSFHMRDubPGFM-8EtlWjx7g4Ztjyoeb0S-94URpoIeaCehfitaeoszdYDmEhYHbl-44TnSzxtuP89lC3lHd4pGU"/>
+</div>
+<div class="inline-block p-[2px] rounded-full bg-gradient-to-tr from-primary to-fuchsia-accent shrink-0">
+<img class="w-14 h-14 rounded-full bg-white p-[2px]" data-alt="Creator profile avatar circular" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCW-DVrfjTcM_d--OG88j7nOR2IPI52BIStHWn65zVfYeIcTpL4og6cJXdeRrfBA9_Cc9VLg58iGZn4BZA-WRs0TCHxpsEl5T5Bw3m66mw3YOMR6-b2VIhget2SuXGCB2ArSoqhYsxVzV8EXJXXwuNQEfBvRVp9nFY4HU0MVkiTMAXrNVINP5Sv6zSqK6gGaLgnEQE-o3dtuj4C09Xag3eb8a3sywApxzFyJaGXiBP1I9PaHbEoGtuLSQz221kNFiCnstnQ9yrhGj4"/>
+</div>
+<div class="inline-block p-[2px] rounded-full bg-gradient-to-tr from-fuchsia-accent to-blue-400 shrink-0">
+<img class="w-14 h-14 rounded-full bg-white p-[2px]" data-alt="Creator profile avatar circular" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXsYseL9e7-olI-7LZDqpzvZBIgHi-Oi5CbanKgwkKLpe-k7kUNEagWXVs9aFAhPeJQdxZ_C4oZ_T1p0YWc5Lqx2OAh4pKxRwoEkxykap7NZZY1bykpmzB9dzm0uyYm-dhYZW2omMBeBqSBDpwIpVC2CdyaFgMj34pH8Pal3MiOK1jyzzBkPSURnhurGGmnqaDo4NWZg2yN-LrsTWyofIWG4pC2FzzNx1Hm2s_-urGotzcND3QL8LBhE7VYDyJmCaFQtvbOplEZPk"/>
+</div>
+</div>
+</section>
+<!-- Interactive Feature Grid -->
+<section class="py-24 px-6 space-y-8 bg-white">
+<div class="text-center mb-12">
+<h2 class="text-3xl font-bold text-slate-900 mb-4">Built for Independence</h2>
+<p class="text-slate-500">Everything you need, nothing you don't.</p>
+</div>
+<!-- Card: Zero Fees -->
+<div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-100 border border-slate-50 transition-all hover:-translate-y-1 hover:shadow-primary/10 group">
+<div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 transition-colors group-hover:bg-primary group-hover:text-white">
+<span class="material-icons text-3xl">money_off</span>
+</div>
+<h3 class="text-2xl font-bold mb-3">Zero Fees</h3>
+<p class="text-slate-500 leading-relaxed">Keep 100% of your earnings. No hidden transaction costs or subscription traps.</p>
+</div>
+<!-- Card: Instant Pay -->
+<div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-100 border border-slate-50 transition-all hover:-translate-y-1 hover:shadow-primary/10 group">
+<div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 transition-colors group-hover:bg-primary group-hover:text-white">
+<span class="material-icons text-3xl">bolt</span>
+</div>
+<h3 class="text-2xl font-bold mb-3">Instant Pay</h3>
+<p class="text-slate-500 leading-relaxed">Receive payments in real-time. Direct-to-wallet settlements powered by the blockchain.</p>
+</div>
+<!-- Card: True Ownership -->
+<div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-100 border border-slate-50 transition-all hover:-translate-y-1 hover:shadow-primary/10 group">
+<div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 transition-colors group-hover:bg-primary group-hover:text-white">
+<span class="material-icons text-3xl">verified_user</span>
+</div>
+<h3 class="text-2xl font-bold mb-3">True Ownership</h3>
+<p class="text-slate-500 leading-relaxed">Your content, your audience, your data. Forever portable and decentralized.</p>
+</div>
+</section>
+<!-- Pricing Section -->
+<section class="py-24 px-6 mesh-gradient relative">
+<div class="max-w-md mx-auto">
+<div class="glass-card rounded-[3rem] p-10 text-center shadow-2xl relative overflow-hidden">
+<div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl"></div>
+<h2 class="text-sm font-bold uppercase tracking-widest text-primary mb-8">Simple Platform Fee</h2>
+<div class="mb-6">
+<span class="text-7xl font-bold text-gradient">5%</span>
+</div>
+<p class="text-slate-600 font-medium mb-10 text-lg">One tiny fee. Unlimited potential.</p>
+<ul class="text-left space-y-5 mb-10">
+<li class="flex items-center gap-3 text-slate-700">
+<span class="material-icons text-primary text-xl">check_circle</span>
+<span>Unlimited Assets</span>
+</li>
+<li class="flex items-center gap-3 text-slate-700">
+<span class="material-icons text-primary text-xl">check_circle</span>
+<span>Global Content Delivery</span>
+</li>
+<li class="flex items-center gap-3 text-slate-700">
+<span class="material-icons text-primary text-xl">check_circle</span>
+<span>Smart Contract Minting</span>
+</li>
+</ul>
+<button class="w-full bg-slate-900 text-white py-5 rounded-full font-bold text-lg transition-all active:scale-95 shadow-xl shadow-slate-300">
+                    Get Started Now
+                </button>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="pt-16 pb-32 px-6 bg-mist text-center">
+<div class="flex items-center justify-center gap-2 mb-8">
+<div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+<span class="material-icons text-white text-[10px]">rocket_launch</span>
+</div>
+<span class="text-lg font-bold tracking-tight">Backr</span>
+</div>
+<p class="text-slate-400 text-sm mb-8">© 2024 Backr Inc. Decentralizing the future of work.</p>
+<div class="flex justify-center gap-8 text-slate-500 font-medium text-sm">
+<a href="#">Privacy</a>
+<a href="#">Terms</a>
+<a href="#">Security</a>
+</div>
+</footer>
+<!-- Mobile Navigation Tab Bar -->
+<div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-100 px-8 pt-4 pb-8 z-50 flex justify-between items-center">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-icons text-2xl">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons text-2xl">explore</span>
+<span class="text-[10px] font-bold">Explore</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors">
+<div class="w-12 h-12 -mt-8 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30 text-white">
+<span class="material-icons text-2xl">add</span>
+</div>
+<span class="text-[10px] font-bold">Studio</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons text-2xl">account_balance_wallet</span>
+<span class="text-[10px] font-bold">Wallet</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons text-2xl">person_outline</span>
+<span class="text-[10px] font-bold">Profile</span>
+</button>
+</div>
+</body></html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c2bee",
+                        "fuchsia-accent": "#e831ff",
+                        "background-light": "#f8f9fc",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "3xl": "2.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .glass-dark {
+            background: rgba(140, 43, 238, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(140, 43, 238, 0.2);
+        }
+        .text-shadow-sm {
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased min-h-screen">
+<!-- Mobile Device Container -->
+<div class="max-w-md mx-auto relative min-h-screen pb-24 shadow-2xl bg-white dark:bg-zinc-950 overflow-hidden">
+<!-- Header Section -->
+<header class="relative h-[280px]">
+<img alt="Cover Art" class="w-full h-full object-cover" data-alt="Dreamy watercolor abstract brush strokes header" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA63iSMXsrdebtzlv3jX37AOUT7Ey4x0Rfr8gNuZnaC486wZ-4w4XaoTbu-s9Z14Dq1JzFfsl8jRM_gjhPh_gmIeJcEQzBqzii9uSS_-GpdH0WKef-F2GBAF_pTsXH4PIQNpyrOT-SmlCZIb4Jbhk6QVLeL9MHN7RicMjDJLvJ1u4hago-4k2EHKIJ_VoIhfMxSJY_avEtOPDsMnn0zxWmn-6-QYZRwAI-L3FZ1_7NHl__9rF7CKvAStE56jOqSjj4fOwskSJ5GFZ8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-light via-transparent dark:from-background-dark to-transparent"></div>
+<!-- Top Controls -->
+<div class="absolute top-12 left-0 right-0 px-6 flex justify-between items-center">
+<button class="w-10 h-10 rounded-full glass flex items-center justify-center text-slate-800">
+<span class="material-icons-round">chevron_left</span>
+</button>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full glass flex items-center justify-center text-slate-800">
+<span class="material-icons-round text-[20px]">share</span>
+</button>
+<button class="w-10 h-10 rounded-full glass flex items-center justify-center text-slate-800">
+<span class="material-icons-round text-[20px]">more_horiz</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Profile Content -->
+<div class="relative px-6 -mt-16 text-center">
+<!-- Avatar -->
+<div class="relative inline-block">
+<img alt="Sarah Paints Profile" class="w-32 h-32 rounded-full border-4 border-white dark:border-zinc-950 object-cover shadow-xl" data-alt="Professional portrait of a female artist smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAa_EokmH-m1oKyiMRRZi1MeJFRSHjPYvz0OdPJL0ziSw1NGmvOh-8pJrr_nqXCJEIK0ickBdBFPoQoKOL9xyzdEtuI71QaCb-LT2kGgVbWSAzbhlneweIaEpcifR-xgzHmBhp8v66B9_1repvdhFtFYELyv1qSbZGPiGe7Qa4grjG7e5Zx5stsGsPELOvuGSal-ROqazVK0Mlg65NVCtJSSK8NlhFxo7zfOqelrdODnkc9Nk_NQbwPHWXROEhp89FSuO8bL0LvCFk"/>
+<div class="absolute bottom-2 right-2 bg-primary text-white p-1 rounded-full border-2 border-white dark:border-zinc-950">
+<span class="material-icons-round text-[14px]">check</span>
+</div>
+</div>
+<h1 class="font-serif text-3xl mt-4 dark:text-white">Sarah Paints</h1>
+<p class="text-slate-500 dark:text-slate-400 font-medium mt-1">Digital Artist &amp; Illustrator</p>
+<!-- Stats Row -->
+<div class="flex items-center justify-center gap-8 mt-6 pb-6 border-b border-slate-200 dark:border-zinc-800">
+<div class="text-center">
+<span class="block text-lg font-bold dark:text-white">12k</span>
+<span class="text-xs uppercase tracking-widest text-slate-400 font-semibold">Followers</span>
+</div>
+<div class="w-[1px] h-6 bg-slate-200 dark:bg-zinc-800"></div>
+<div class="text-center">
+<span class="block text-lg font-bold dark:text-white">540</span>
+<span class="text-xs uppercase tracking-widest text-slate-400 font-semibold">Patrons</span>
+</div>
+</div>
+</div>
+<!-- Membership Tier (Featured Section) -->
+<section class="mt-8 px-6">
+<h2 class="font-serif text-xl mb-4 dark:text-white px-2">Membership</h2>
+<div class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-xl shadow-primary/5 border border-primary/10 relative overflow-hidden">
+<div class="absolute -top-12 -right-12 w-24 h-24 bg-primary/10 rounded-full blur-2xl"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-serif text-2xl text-primary">Support Level 1</h3>
+<p class="text-slate-400 text-sm mt-1 font-medium">Starter community access</p>
+</div>
+<div class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold">
+                        $5/mo
+                    </div>
+</div>
+<ul class="space-y-3 mb-6">
+<li class="flex items-center gap-3 text-slate-600 dark:text-slate-300 text-sm">
+<span class="material-icons-round text-primary text-[18px]">check_circle</span>
+                        Behind the scenes access
+                    </li>
+<li class="flex items-center gap-3 text-slate-600 dark:text-slate-300 text-sm">
+<span class="material-icons-round text-primary text-[18px]">check_circle</span>
+                        Weekly digital wallpapers
+                    </li>
+<li class="flex items-center gap-3 text-slate-600 dark:text-slate-300 text-sm">
+<span class="material-icons-round text-primary text-[18px]">check_circle</span>
+                        Discord community role
+                    </li>
+</ul>
+<button class="w-full py-4 rounded-full bg-gradient-to-r from-primary to-fuchsia-accent text-white font-bold text-lg shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform">
+                    Join Support Level 1
+                </button>
+</div>
+</section>
+<!-- Content Feed -->
+<main class="mt-10 px-6 space-y-8 pb-10">
+<div class="flex items-center justify-between px-2">
+<h2 class="font-serif text-xl dark:text-white">Recent Posts</h2>
+<button class="text-primary font-bold text-sm">View all</button>
+</div>
+<!-- Post 1: High-res Unlocked Image -->
+<article class="bg-white dark:bg-zinc-900 rounded-3xl overflow-hidden shadow-lg border border-slate-100 dark:border-zinc-800">
+<div class="p-4 flex items-center gap-3">
+<img alt="Avatar Small" class="w-8 h-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9_vq8f4ch5KsGuMfgd5uIhjzEE-o18y05YS36h4mPruaf_l8ve9rE1I4l-tvDhw7N3XKVyVm8gdaur1YPmwKuXYIrTyk4YT0GxYOBmqeB8GxFc8ClkNu7WReXhB5tk0OysK9uFUxk8vR2MH_NF4SLVkV63sZ8KeCU9RlLZZrP5x8Hx5OJKsU8Hbx1YmgMgeai3rxm4IiGL3EufSiUFAb3wSbRfFgZSNuTxyNmOj0M3pRIJDZMp1bsJGuT9MyCMPa79W7jXLdxWP4"/>
+<div>
+<p class="text-xs font-bold dark:text-white">Sarah Paints</p>
+<p class="text-[10px] text-slate-400">2 hours ago</p>
+</div>
+</div>
+<div class="aspect-square w-full">
+<img alt="Latest Sketch" class="w-full h-full object-cover" data-alt="Detailed digital oil painting of a mythical creature" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCfcXnL9ibX0zKEYGJKWPgPGi4wEIOiix2HUwzzmoAEtY-NSsNwpDa8oeT7hdrqhdJ7NpnwDrb0hqvQ6W-38YYOZmO5i8apnmHGNdMkx-AM5wvo8KZWkfDTn2WfOh7wLqewNXcmfK-CfDQtkupZZ2BKrykWG1K6ZpbtD-jxMrqJ55-FdHG_4SpNXOKF7XKH4RdgCeXHKTyHCzSgkiNPqests9W4TqoA4kqGcI2IPAv7VNxhIMNb_6nib2cNU8xJ-Zj5-MPs2E_3CA"/>
+</div>
+<div class="p-5">
+<h4 class="font-bold text-lg mb-1 dark:text-white">Latest Sketch</h4>
+<p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Testing out some new brushes for the summer collection. Really loving the texture on this one! ✨</p>
+<div class="mt-4 flex items-center gap-4 text-slate-400">
+<div class="flex items-center gap-1">
+<span class="material-icons-round text-[20px]">favorite_border</span>
+<span class="text-xs">1.2k</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-icons-round text-[20px]">chat_bubble_outline</span>
+<span class="text-xs">84</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Post 2: Locked Video Preview -->
+<article class="bg-white dark:bg-zinc-900 rounded-3xl overflow-hidden shadow-lg border border-slate-100 dark:border-zinc-800 relative">
+<div class="p-4 flex items-center gap-3">
+<img alt="Avatar Small" class="w-8 h-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtl464IMokbEyjY-M57AHhRmRnJJNFE0xWeQaQHlpxd4yR9wC5u4QSKvQblznzUTy9aVggoO1CxZ3llwcRvoBrmI7JuExwsxeqr6DfZiApod_yP6_2Gz2XYcOQ9uKAPEXfMXpRHmKZ9CFxcnkEyj2JfSOh4NDQVxGgSj4Q4frdIPQjvbcIcqL0JBTvzfaYKmkZxQw8HF4FKyDrpVUSy9XfFQ0QyhW_Iwzpj9OEAq_64z4FQyRL7dCS-DoK2-a_uK8oBKe_2XEBBcI"/>
+<div>
+<p class="text-xs font-bold dark:text-white">Sarah Paints</p>
+<p class="text-[10px] text-slate-400 flex items-center gap-1">
+<span class="material-icons-round text-[12px]">lock</span>
+                            Patrons only • 5 hours ago
+                        </p>
+</div>
+</div>
+<div class="aspect-video w-full relative">
+<!-- Blurred Background Placeholder -->
+<img alt="Procreate Process" class="w-full h-full object-cover blur-xl" data-alt="Blurred purple and blue neon aesthetic background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBi-0Z0cprK1K0QMt5oyO0j_G7GZVgRNvQUlWmrA6zW45WewGGJkIN054EWc4AQIE9sKT6AArOZcXKrfRvJY9GzP9HQe6XIL4IWXjfystf0QI8ErPBgMzRujyDeL_vg77Pj_EnlhnGKQL69WMt_00uNrs1MxMr5D2goWdpu4OTeIaPR-QTeSUNJYK2fDkvEpDDg224DylfHUELOwDBiKaFIgzkm4SAFEX5HeyZfqRkMBsgqpByJk-jAqRY6V7mZKyuIn0J_h_Jl_AI"/>
+<!-- Glass Overlay -->
+<div class="absolute inset-0 flex items-center justify-center p-8">
+<div class="glass w-full h-full rounded-2xl flex flex-col items-center justify-center text-center p-6 border-white/50">
+<div class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center mb-4 shadow-lg">
+<span class="material-icons-round text-3xl">lock</span>
+</div>
+<h4 class="font-bold text-slate-800 mb-2">Procreate Process</h4>
+<p class="text-xs text-slate-600 mb-4">Unlock this video by joining the Support Level 1 tier or higher.</p>
+<button class="bg-primary text-white text-xs px-6 py-2 rounded-full font-bold">Unlock Content</button>
+</div>
+</div>
+</div>
+<div class="p-5">
+<div class="mt-4 flex items-center gap-4 text-slate-300">
+<div class="flex items-center gap-1">
+<span class="material-icons-round text-[20px]">favorite_border</span>
+<span class="text-xs">430</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-icons-round text-[20px]">chat_bubble_outline</span>
+<span class="text-xs">12</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Post 3: Clean Text Post -->
+<article class="bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-lg border border-slate-100 dark:border-zinc-800">
+<div class="flex items-center gap-3 mb-4">
+<img alt="Avatar Small" class="w-8 h-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCX4fqqgLqaI31iO5jdWYA9cS9znN_as5IvXdlNly52TFxSxJUge-g2c0s2r_YhUwmbjx3zOe87dX9b-Agk9k5QM8xgA677rKAoXjTV9rJaf2SZN0S35phqs_QIDWthELz_-Hx0BtzTEFGleEN6TJNUtUFUBHF6v877ImiueJeFiJGx8w1YaDb-OoiQPdr3tVDmR9S8x0lemCtSfrNc9jCHZ1mJ7bZ-tYbz-sDIQNQzbhAAs_DGei230n1v2wgo6aPWLuSEBNQNKY"/>
+<div>
+<p class="text-xs font-bold dark:text-white">Sarah Paints</p>
+<p class="text-[10px] text-slate-400">Yesterday at 6:45 PM</p>
+</div>
+</div>
+<p class="text-slate-700 dark:text-slate-300 font-medium text-base mb-6 leading-relaxed">
+                    Working on a massive new brush set for all my fellow digital painters! It’s going to include my custom charcoal and blender brushes. Can’t wait to share it with you all soon! 🖌️✨
+                </p>
+<div class="flex items-center gap-4 text-slate-400">
+<div class="flex items-center gap-1">
+<span class="material-icons-round text-[20px]">favorite</span>
+<span class="text-xs text-primary font-bold">892</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-icons-round text-[20px]">chat_bubble_outline</span>
+<span class="text-xs">42</span>
+</div>
+</div>
+</article>
+</main>
+<!-- Fixed Bottom Navigation (iOS Style) -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-24 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-t border-slate-200 dark:border-zinc-800 flex items-center justify-around px-8 pb-8 z-50">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-icons-round">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-icons-round">explore</span>
+<span class="text-[10px] font-bold">Explore</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors">
+<div class="bg-primary/10 text-primary w-12 h-10 rounded-xl flex items-center justify-center mb-1">
+<span class="material-icons-round">video_library</span>
+</div>
+<span class="text-[10px] font-bold">Studio</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-icons-round">account_balance_wallet</span>
+<span class="text-[10px] font-bold">Wallet</span>
+</button>
+<!-- Home Indicator Space -->
+<div class="absolute bottom-1 w-32 h-1 bg-slate-300 dark:bg-zinc-800 rounded-full left-1/2 -translate-x-1/2"></div>
+</nav>
+</div>
+</body></html>

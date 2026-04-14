@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Backr - Explore Creators</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#8c2bee",
+                "background-light": "#f7f6f8",
+                "background-dark": "#191022",
+              },
+              fontFamily: {
+                "display": ["Inter", "sans-serif"],
+                "serif": ["Playfair Display", "serif"]
+              },
+              borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .hero-title { font-family: 'Playfair Display', serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<!-- Header / Navigation -->
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10">
+<nav class="max-w-md mx-auto px-6 py-4 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+<span class="text-white font-bold text-xs">B</span>
+</div>
+<span class="font-bold text-lg tracking-tight">Backr</span>
+</div>
+<div class="flex items-center gap-6">
+<span class="material-icons-outlined text-primary cursor-pointer">explore</span>
+<span class="material-icons-outlined text-slate-400 cursor-pointer">dashboard</span>
+<span class="material-icons-outlined text-slate-400 cursor-pointer">account_balance_wallet</span>
+</div>
+</nav>
+</header>
+<main class="max-w-md mx-auto pb-24">
+<!-- Hero Section -->
+<section class="px-6 pt-10 pb-6 text-center">
+<h1 class="hero-title text-4xl text-slate-900 dark:text-white mb-8 leading-tight">
+                Discover Your Next Favorite Creator
+            </h1>
+<!-- Search Pill -->
+<div class="relative group">
+<div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+<span class="material-icons-outlined text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+</div>
+<input class="w-full py-4 pl-14 pr-6 bg-white dark:bg-slate-800 rounded-full border-none shadow-sm focus:ring-2 focus:ring-primary/50 text-sm transition-all" placeholder="Find creators, music, art..." type="text"/>
+</div>
+</section>
+<!-- Filter Tags -->
+<section class="mb-10">
+<div class="flex gap-3 overflow-x-auto px-6 hide-scrollbar">
+<button class="flex-none px-6 py-2.5 bg-primary text-white rounded-full text-sm font-medium shadow-lg shadow-primary/20">
+                    All
+                </button>
+<button class="flex-none px-6 py-2.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-sm font-medium border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-colors">
+                    Music
+                </button>
+<button class="flex-none px-6 py-2.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-sm font-medium border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-colors">
+                    Podcasts
+                </button>
+<button class="flex-none px-6 py-2.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-sm font-medium border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-colors">
+                    Art
+                </button>
+<button class="flex-none px-6 py-2.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-sm font-medium border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-colors">
+                    Photography
+                </button>
+</div>
+</section>
+<!-- Trending Now Carousel -->
+<section class="mb-12">
+<div class="flex items-center justify-between px-6 mb-5">
+<h2 class="text-xl font-bold tracking-tight">Trending Now</h2>
+<button class="text-xs font-semibold text-primary uppercase tracking-wider">See all</button>
+</div>
+<div class="flex gap-4 overflow-x-auto px-6 hide-scrollbar">
+<!-- Featured Card 1 -->
+<div class="flex-none w-72 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer hover:-translate-y-1">
+<div class="relative h-44 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Electronic music producer performing live on stage" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvSUeXu69GhNHyFIVV8S_y_QGLKxr_5rRhkN7oYrGVkWur0jjm-iDLgpQqZU7L1uLCM05drVu6GN0BU40Xe4vAt4_qkzMp2iCWwYXWfQQ__ZXwn2tVfphod9AV7gCBXgcrVbPnke2RWXPjcLaIdSHwFCdLA-fKGQzcIYnNVXjpYOMnVDw4iulQxL7mzaJsvWtK9SCJl5IeQyDCqd2e--MRrBG_j_XcWqw7XqGpVIx5o4-ooF5RWP_aS0g_qAhUoYSCvBiiDEFpTiw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<span class="px-2 py-1 bg-primary text-white text-[10px] font-bold uppercase rounded tracking-widest">Featured</span>
+</div>
+</div>
+<div class="p-5 flex items-end justify-between">
+<div class="flex gap-3 items-center">
+<div class="relative -mt-10">
+<img class="w-14 h-14 rounded-full border-4 border-white dark:border-slate-800 object-cover" data-alt="Portrait of a female digital artist" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7OIjPCvy0TR6yk_2md_6VIcYKWtuFpukLWsVW0k9Exs-9wT4og02qh5JCRlcbjFrsknyAom4Qfziq4Keyo0pkdtqXPrZ8tUjlD5Cch8w9IfUz7fiylRzwI4qmWqzfksdpFkkO_jwCRmHRSiS_hz8wbiM-TRv-vg1OauPnYh_ubAyV_sXn_izZ9Zvc5gfH-z_hrJK6gsrDZNhlNWLv0PO4JXT1LkC0ZizMOwQy7Qo7jnTOc1QEgJZYBX2jfdGe7EySeWQctPWB028"/>
+</div>
+<div>
+<h3 class="font-bold text-slate-900 dark:text-white">Lyra Synthia</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400">Electronic Artist</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-[10px] font-bold text-primary uppercase">2.4k backrs</p>
+</div>
+</div>
+</div>
+<!-- Featured Card 2 -->
+<div class="flex-none w-72 bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer hover:-translate-y-1">
+<div class="relative h-44 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Modern high-tech podcast studio setup" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkpJjsyDGc9XMT_ZwefIFWBn8r1PPhtqfsgqGT7mFo_41CUw2KYgTmYBy3FDHiu-XDhKV40Tj9CSMkBjff6u0H0G85oMb-Y4AZVpWqI18yU8ZWn4Pg--V5n9c2MgKlMKY0aZGv60-E6OX6ZXfk3FbDpqvRR6K2JtCVfklKD1F3kqx6ljz2uTVW3NaUtm4k05EgqqSNgK6U3OzfZfxbFIiIZAS8cFYsGQdqR-8K-t3d12rQ4kEuxiHqMcQGVwbpoBr5JoKHbtUOuDc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<span class="px-2 py-1 bg-primary text-white text-[10px] font-bold uppercase rounded tracking-widest">Live</span>
+</div>
+</div>
+<div class="p-5 flex items-end justify-between">
+<div class="flex gap-3 items-center">
+<div class="relative -mt-10">
+<img class="w-14 h-14 rounded-full border-4 border-white dark:border-slate-800 object-cover" data-alt="Portrait of a male podcast host" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAm-w136y-y7wD3N8ZiJ8OHyKx798y17XD5ove1lCVEzTRCEe9bzNTA68FbL61Z1uAzesRtKe2t9Gtf7A8cnwvOiMxMT6vWUY8KGVSomM5pT7FJspS4O11uIQSy5YKrKv9dNIUhYLhfBpoPcvKRuuNmrO_tzhsvA7deNuPIuiiJ3ubS0P1Jvyixa1xt96Tdl9ilryWnBN5iGl0ThZV99b14W_b6Kao1JrM_8uoyhOmAutxbQ5sSU7YRpYnc7iBik7I5VEfq1rZAztI"/>
+</div>
+<div>
+<h3 class="font-bold text-slate-900 dark:text-white">The Void Pod</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400">Futurism &amp; Tech</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-[10px] font-bold text-primary uppercase">1.8k backrs</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Creator Grid -->
+<section class="px-6">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-xl font-bold tracking-tight">Recent Discoveries</h2>
+<span class="material-icons-outlined text-slate-400">tune</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Creator Item 1 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl p-3 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer">
+<div class="relative mb-3">
+<img class="w-full aspect-square object-cover rounded-lg group-hover:brightness-90 transition-all" data-alt="Vibrant abstract colorful 3D render art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVJXCm5QHzoAk9NpPq0iGFAl25gN9wdepC8V3SBxKbcksGtWDz0ZECyebaLiLd7cRf-gDyX237appPFDY7y9jxx9uMP91rbRkuvVJ-fsVtHEsqMdiVXcmkKG79_i5-pYK0QwQ_TQaTaBoyOnyoDCmyAJhq7QNzibzyQpOAOoS-74dO3eBjbRCfXDPAy3Yno5eehvx3yiOxfIIi_texl5ICXJ1h2UV-kE-we0uRrvCfo4dJ73_l_Dx9WyD0gDel8WZa4Q3G8ZS8Ipc"/>
+<div class="absolute -bottom-3 left-1/2 -translate-x-1/2">
+<img class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-800 object-cover" data-alt="User avatar thumbnail of female creator" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8Uop2CHDbDDJxsdajqnydcmZhksm471P70urRt0-DhHGAx5qgBtUvV9lnVPeQ-xW6wSK8PYntywKyKVDDzfulC9TjwSXCp5ehCuzLy0TUCSb-uRzu6wIcu_T-dqHxk1NUdGBDFEQ_tc9SclI89blNqz0KFpbuGqwH1DHdjbvhY8lJLz93lLZgUqo_KhCNORoIAEn0MoNOxFsYw-GU1o8yI1VRejE-dgE1NJZ-tPy_OF6volVeJd3GBihMFZHALeKjKVhhDB15BSY"/>
+</div>
+</div>
+<div class="pt-2 text-center">
+<h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">Maya Moon</h4>
+<p class="text-[10px] text-slate-500 mb-3">3D Artist</p>
+<div class="flex items-center justify-center gap-1 mb-3">
+<span class="material-icons-outlined text-[12px] text-slate-400">people</span>
+<span class="text-[10px] font-semibold text-slate-500">1.2k members</span>
+</div>
+<button class="w-full py-2 border border-primary/20 text-primary text-xs font-bold rounded-full hover:bg-primary hover:text-white transition-colors">
+                            Join
+                        </button>
+</div>
+</div>
+<!-- Creator Item 2 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl p-3 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer">
+<div class="relative mb-3">
+<img class="w-full aspect-square object-cover rounded-lg group-hover:brightness-90 transition-all" data-alt="Turntable spinning a vinyl record" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVBA8VVTO7T21whufZTnKpso1QC4aEqNY9tpUdpg5dHH41Kp22Ljp8xopUOvQzbNgGo5Vzf8V1cf488Isol0bZlpolpmrLYuC6E1-7snqFHyLWoJZsUz9JgGQg5HjpAIGAjFfPaQdbiHDCct_XEm_jLJlhIXG8xCbiWCjZK5izWE5WSXJJZZuPoY2Fw1Sjv6uGze48jsNheu5OWix6DZ0RLgXXYW8tQ6ykrts3hHZuLyQZeyiRhStZZ08Avhutz6w3gYOyuST6ZMM"/>
+<div class="absolute -bottom-3 left-1/2 -translate-x-1/2">
+<img class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-800 object-cover" data-alt="User avatar thumbnail of male creator" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4FkwnBbfzOP_au1WUNfIRrcg33ujYMv1XM1b8Xh0ZeZaK8oGdTecf0wGawfuADfED6X7LCV29P3IUXrDrA7kQJ7M2YexlGdiXHBBU9CJzYMTjr_JXfY1ThG72wm5NmcNGJFqbuA6fL9hpG4RU4hwfPPKmFiXLdh-4S8M4_j-9mPAEMsby9L7Gvxvbz80paJOU40GKOuS_n9m6oSlbUugO8RVXABsyWJB43vKLC-B845OuE2MlIqAD0N_ufNsscKzfKs9QNgHCEBg"/>
+</div>
+</div>
+<div class="pt-2 text-center">
+<h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">DJ Solace</h4>
+<p class="text-[10px] text-slate-500 mb-3">Lo-fi Beats</p>
+<div class="flex items-center justify-center gap-1 mb-3">
+<span class="material-icons-outlined text-[12px] text-slate-400">people</span>
+<span class="text-[10px] font-semibold text-slate-500">850 members</span>
+</div>
+<button class="w-full py-2 border border-primary/20 text-primary text-xs font-bold rounded-full hover:bg-primary hover:text-white transition-colors">
+                            Join
+                        </button>
+</div>
+</div>
+<!-- Creator Item 3 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl p-3 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer">
+<div class="relative mb-3">
+<img class="w-full aspect-square object-cover rounded-lg group-hover:brightness-90 transition-all" data-alt="Person writing in an artistic notebook" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNsvYcZZgoo9IYjheVcygrr6dESmEmuLWQcLxV01oChbYD3NpucjRIuK2Ixz1RW8gAL0yUflrJn19ESAJdm4wQ-OxydAfjHy1iqM_1tQlhW1bA2m9mpmpUPSCSvXcm3w5paDRZwb0yiwjs47bHYO5KMfNNQgg40z3KRtkDMJ4WLA1_Pq8iNbn7oh566PUG27rgX_FYj8x07nnGornE72CGyxOq4qiyYUY4a4uPVPvwWxQ2mo1FE_lNq68vCuo6NYrpJ5tTEzRsOFw"/>
+<div class="absolute -bottom-3 left-1/2 -translate-x-1/2">
+<img class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-800 object-cover" data-alt="User avatar thumbnail of female writer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIQPF6urgfEy3LhE2Y3scFF5GcmqtcMN36g6BVYuQK6QdbCp1lYsJyzbzOUOLKVR-3h29dDyw-HEWPbaVgm32wTJSj00Nm1-Z09uYuRyYYFzMi9keGQ1qqW_sO0LCbubBSWIhiFubyN--Iro3kjocmecHgHa4ImOVPqVaw__pS5plcpbrBouIxSxQPefmj-eBkUPFehkdYcPqQXQdSZq_xmBa7eXy0fdkjBCWwDKR7NZ4KXHYwi5w8msy0WpBMdVLdZe85HJTpHDE"/>
+</div>
+</div>
+<div class="pt-2 text-center">
+<h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">Eara Pen</h4>
+<p class="text-[10px] text-slate-500 mb-3">Storyteller</p>
+<div class="flex items-center justify-center gap-1 mb-3">
+<span class="material-icons-outlined text-[12px] text-slate-400">people</span>
+<span class="text-[10px] font-semibold text-slate-500">3.4k members</span>
+</div>
+<button class="w-full py-2 border border-primary/20 text-primary text-xs font-bold rounded-full hover:bg-primary hover:text-white transition-colors">
+                            Join
+                        </button>
+</div>
+</div>
+<!-- Creator Item 4 -->
+<div class="bg-white dark:bg-slate-800 rounded-xl p-3 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer">
+<div class="relative mb-3">
+<img class="w-full aspect-square object-cover rounded-lg group-hover:brightness-90 transition-all" data-alt="Macro photo of detailed book pages" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLOftCd5ekXJZxV8T8ZWweuLToEW-yx5DBRs-KY4qnrdbRJwhyCypUNqU0zifA6HrvCEsherAzeqMVYGt41vwFaHwSlmFgVXj8TQKyvhQjM7lS-gYFsC0Prd6zT05z6YeWHLanvfOULgQZ8MIN-XbpUToaQsez0SKzERLd-2h7G9ooQk6c3ZtaTEcx4Ei51_HkLBqU1P01nJhKFOgjPuKd3dwK0VtQMAlDSa_hTyd9h6eFIzrhxKi59jqvBUCQNVKuZdKNNqonuPk"/>
+<div class="absolute -bottom-3 left-1/2 -translate-x-1/2">
+<img class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-800 object-cover" data-alt="User avatar thumbnail of male educator" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqZ9Z67x3e3LcqyWBMiKS2ysusFbpXZcepku6FMhZDmFR6mdwYlrcMkj9-5c8G4s_Z0JRmVj_H33F96B_FxwnU_tdcgB-wOf4zP2PCHNJBG6p6nGpb2B-c7RbWm0j5RpVude2z3SpWxFVyASfnhqt39-nCnWqOTkCPvHKnhYtTo3fRDHh7PMSZXU-4fwvrNmxsazCGPf0sQDJAJWw_apec4hNIFcZA_SOExQyyVTW33KefyP2yl1qzKc0bxULFGJeONgtkl09c6QQ"/>
+</div>
+</div>
+<div class="pt-2 text-center">
+<h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">Marcus Dev</h4>
+<p class="text-[10px] text-slate-500 mb-3">Web3 Devs</p>
+<div class="flex items-center justify-center gap-1 mb-3">
+<span class="material-icons-outlined text-[12px] text-slate-400">people</span>
+<span class="text-[10px] font-semibold text-slate-500">920 members</span>
+</div>
+<button class="w-full py-2 border border-primary/20 text-primary text-xs font-bold rounded-full hover:bg-primary hover:text-white transition-colors">
+                            Join
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="mt-16 px-6 py-12 border-t border-slate-100 dark:border-slate-800 text-center">
+<div class="flex justify-center gap-6 mb-6">
+<a class="text-xs font-medium text-slate-400 hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="text-xs font-medium text-slate-400 hover:text-primary transition-colors" href="#">Terms</a>
+<a class="text-xs font-medium text-slate-400 hover:text-primary transition-colors" href="#">Support</a>
+<a class="text-xs font-medium text-slate-400 hover:text-primary transition-colors" href="#">Careers</a>
+</div>
+<p class="text-[10px] text-slate-400 font-medium tracking-widest uppercase">© 2024 Backr Decentralized Platform</p>
+</footer>
+</main>
+<!-- Navigation Bar (iOS style bottom) -->
+<div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 dark:bg-background-dark/90 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-8 py-4 flex justify-between items-center z-50">
+<div class="flex flex-col items-center gap-1 group cursor-pointer">
+<span class="material-icons-outlined text-slate-400 group-hover:text-primary transition-colors">home</span>
+<span class="text-[10px] font-bold text-slate-400 group-hover:text-primary">Home</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer">
+<span class="material-icons-outlined text-primary">explore</span>
+<span class="text-[10px] font-bold text-primary">Explore</span>
+</div>
+<div class="flex flex-col items-center gap-1 group cursor-pointer">
+<div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center -mt-8 shadow-lg shadow-primary/10 border-4 border-white dark:border-background-dark">
+<span class="material-icons-outlined text-primary">add</span>
+</div>
+<span class="text-[10px] font-bold text-slate-400 group-hover:text-primary mt-1">Create</span>
+</div>
+<div class="flex flex-col items-center gap-1 group cursor-pointer">
+<span class="material-icons-outlined text-slate-400 group-hover:text-primary transition-colors">video_library</span>
+<span class="text-[10px] font-bold text-slate-400 group-hover:text-primary">Studio</span>
+</div>
+<div class="flex flex-col items-center gap-1 group cursor-pointer">
+<span class="material-icons-outlined text-slate-400 group-hover:text-primary transition-colors">account_balance_wallet</span>
+<span class="text-[10px] font-bold text-slate-400 group-hover:text-primary">Wallet</span>
+</div>
+</div>
+</body></html>

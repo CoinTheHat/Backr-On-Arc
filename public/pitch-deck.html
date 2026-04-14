@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backr - Pitch Deck</title>
+    <style>
+        :root {
+            --bg-color: #0f0b1e;
+            --text-color: #ffffff;
+            --accent-color: #a855f7;
+            --secondary-color: #e9d5ff;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: radial-gradient(circle at 50% 50%, #2e1065 0%, #0f0b1e 70%);
+        }
+        .slide-container {
+            width: 80%;
+            max-width: 1200px;
+            aspect-ratio: 16/9;
+            position: relative;
+        }
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.5s ease;
+        }
+        .slide.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        h1 { font-size: 4rem; margin: 0 0 20px 0; background: linear-gradient(to right, #fff, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { font-size: 2.5rem; margin: 0 0 40px 0; color: var(--secondary-color); }
+        h3 { font-size: 1.5rem; margin: 0 0 20px 0; color: var(--accent-color); text-transform: uppercase; letter-spacing: 2px; }
+        ul { list-style: none; padding: 0; }
+        li { font-size: 1.4rem; margin-bottom: 20px; padding-left: 30px; position: relative; color: #cbd5e1; }
+        li::before { content: '•'; color: var(--accent-color); font-size: 2rem; position: absolute; left: 0; top: -5px; }
+        p { font-size: 1.4rem; line-height: 1.6; color: #cbd5e1; max-width: 800px; }
+        
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        button:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+        
+        .progress { position: fixed; bottom: 0; left: 0; height: 4px; background: var(--accent-color); transition: width 0.3s; }
+        .slide-number { position: absolute; bottom: 30px; left: 40px; color: rgba(255, 255, 255, 0.3); font-size: 1.2rem; }
+        
+        /* Specific Slide Styles */
+        .title-slide { text-align: center; align-items: center; }
+        .title-slide h1 { font-size: 6rem; margin-bottom: 20px; }
+        .title-slide p { font-size: 1.8rem; opacity: 0.8; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.2rem; }
+        th { color: var(--accent-color); }
+    </style>
+</head>
+<body>
+
+<div class="slide-container">
+    
+    <!-- Slide 1 -->
+    <div class="slide active title-slide">
+        <h1>Backr</h1>
+        <p>The On-Chain Membership Platform</p>
+        <p style="font-size: 1.2rem; color: #a855f7; margin-top: 40px;">Built on Mantle Network</p>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide">
+        <h3>The Problem</h3>
+        <h2>Creators are Rented, Not Owned</h2>
+        <ul>
+            <li><strong>Platform Risk:</strong> De-platforming and shadow-banning on Web2.</li>
+            <li><strong>High Fees:</strong> 10-30% lost to middlemen and processors.</li>
+            <li><strong>Delayed Payouts:</strong> Waiting 30-60 days to get paid.</li>
+            <li><strong>Global Friction:</strong> Exclusion of creators in banking deserts.</li>
+        </ul>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide">
+        <h3>The Solution</h3>
+        <h2>Backr: Patreon on Mantle</h2>
+        <p>A decentralized membership platform.</p>
+        <ul>
+            <li><strong>Censorship Resistant:</strong> You own your audience on-chain.</li>
+            <li><strong>Instant Payouts:</strong> Revenue streams directly to your wallet.</li>
+            <li><strong>Low Fees:</strong> Flat 5% platform fee (vs 8-12%).</li>
+            <li><strong>Global Access:</strong> Payments via USDC/MNT for everyone.</li>
+        </ul>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide">
+        <h3>How It Works</h3>
+        <h2>Seamless Experience</h2>
+        <ol style="font-size: 1.4rem; color: #cbd5e1; line-height: 1.8;">
+            <li>1. <strong>Create Profile:</strong> Connect wallet & set tiers.</li>
+            <li>2. <strong>Deploy Contract:</strong> Launch your own smart contract.</li>
+            <li>3. <strong>Publish Content:</strong> Post token-gated content.</li>
+            <li>4. <strong>Get Backed:</strong> Fans subscribe to unlock.</li>
+        </ol>
+    </div>
+
+    <!-- Slide 5 -->
+    <div class="slide">
+        <h3>The Product</h3>
+        <h2>Premium Web3 Experience</h2>
+        <ul>
+            <li><strong>Creator Studio:</strong> Rich editor with media support.</li>
+            <li><strong>Discovery:</strong> Explore page with categories.</li>
+            <li><strong>Analytics:</strong> Real-time dashboard.</li>
+            <li><strong>Token Gating:</strong> Automated access control.</li>
+        </ul>
+    </div>
+
+    <!-- Slide 6 -->
+    <div class="slide">
+        <h3>Market Opportunity</h3>
+        <h2>$250 Billion Creator Economy</h2>
+        <ul>
+            <li><strong>TAM:</strong> $250 Billion Total Market.</li>
+            <li><strong>SAM:</strong> Growing Crypto-Native Creator base.</li>
+            <li><strong>Trend:</strong> Shift from "Rent" (Web2) to "Own" (Web3).</li>
+        </ul>
+    </div>
+
+    <!-- Slide 7 -->
+    <div class="slide">
+        <h3>Business Model</h3>
+        <h2>Aligned Incentives</h2>
+        <ul>
+            <li><strong>Revenue:</strong> 5% Fee on withdrawals.</li>
+            <li><strong>Cost:</strong> Free to start. No upfronts.</li>
+            <li><strong>Efficiency:</strong> Smart contracts handle operations.</li>
+        </ul>
+    </div>
+
+    <!-- Slide 8 -->
+    <div class="slide">
+        <h3>Go-to-Market</h3>
+        <h2>Phased Growth</h2>
+        <ul>
+            <li><strong>Phase 1:</strong> Crypto-Natives & DAO Contributors.</li>
+            <li><strong>Phase 2:</strong> High-Inflation Regions (LATAM, Turkey).</li>
+            <li><strong>Phase 3:</strong> Mainstream via Fiat On-ramps.</li>
+        </ul>
+    </div>
+
+    <!-- Slide 9 -->
+    <div class="slide">
+        <h3>Competition</h3>
+        <h2>Why Backr Wins</h2>
+        <table>
+            <tr>
+                <th>Feature</th>
+                <th>Backr</th>
+                <th>Patreon</th>
+            </tr>
+            <tr>
+                <td>Fees</td>
+                <td>5%</td>
+                <td>8-12%</td>
+            </tr>
+            <tr>
+                <td>Payouts</td>
+                <td>Instant</td>
+                <td>Monthly</td>
+            </tr>
+            <tr>
+                <td>Ownership</td>
+                <td>Creator</td>
+                <td>Platform</td>
+            </tr>
+            <tr>
+                <td>Access</td>
+                <td>Global</td>
+                <td>Restricted</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Slide 10 -->
+    <div class="slide">
+        <h3>Roadmap</h3>
+        <h2>Building the Future</h2>
+        <ul>
+            <li><strong>Q1 2026:</strong> MVP Launch (Done).</li>
+            <li><strong>Q2 2026:</strong> NFT Integration & Interactions.</li>
+            <li><strong>Q3 2026:</strong> Mobile App.</li>
+            <li><strong>Q4 2026:</strong> Gasless Transactions.</li>
+        </ul>
+    </div>
+
+    <!-- Slide 11 -->
+    <div class="slide title-slide">
+        <h1>Join the Revolution</h1>
+        <p>backr.app</p>
+        <p style="color: #a855f7;">Built on Mantle</p>
+    </div>
+
+</div>
+
+<div class="controls">
+    <button onclick="prevSlide()">← Prev</button>
+    <button onclick="nextSlide()">Next →</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progress = document.getElementById('progress');
+
+    function updateSlide() {
+        slides.forEach((slide, index) => {
+            slide.classList.remove('active');
+            if (index === currentSlide) slide.classList.add('active');
+        });
+        progress.style.width = ((currentSlide + 1) / slides.length) * 100 + '%';
+    }
+
+    function nextSlide() {
+        if (currentSlide < slides.length - 1) {
+            currentSlide++;
+            updateSlide();
+        }
+    }
+
+    function prevSlide() {
+        if (currentSlide > 0) {
+            currentSlide--;
+            updateSlide();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+        if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+    updateSlide();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Backr Creator Studio Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#8c2bee",
+            "background-light": "#f7f6f8",
+            "background-dark": "#191022",
+            "mist": "#F8F9FC",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.5rem",
+            "lg": "1rem",
+            "xl": "1.5rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(140, 43, 238, 0.1);
+      border-radius: 10px;
+    }
+    .chart-gradient {
+      background: linear-gradient(180deg, rgba(140, 43, 238, 0.1) 0%, rgba(140, 43, 238, 0) 100%);
+    }
+    .btn-gradient {
+      background: linear-gradient(135deg, #8c2bee 0%, #d946ef 100%);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col overflow-hidden">
+<!-- Mobile Sidebar / Drawer (Hidden by default, shown via CSS or standard toggle logic) -->
+<!-- Using a simulation of an open drawer for visual completeness in mobile view -->
+<aside class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 lg:translate-x-0 hidden">
+<div class="flex flex-col h-full p-6">
+<div class="flex items-center gap-3 mb-10">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+<span class="text-white font-bold text-xl">B</span>
+</div>
+<span class="text-xl font-bold tracking-tight text-slate-800 dark:text-white">Backr</span>
+</div>
+<nav class="space-y-2 flex-1">
+<a class="flex items-center gap-3 p-3 rounded-lg bg-primary/10 text-primary font-medium" href="#">
+<span class="material-icons text-xl">dashboard</span>
+          Overview
+        </a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-icons text-xl">group</span>
+          Members
+        </a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-icons text-xl">article</span>
+          Posts
+        </a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-icons text-xl">payments</span>
+          Earnings
+        </a>
+<a class="flex items-center gap-3 p-3 rounded-lg text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-icons text-xl">settings</span>
+          Settings
+        </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Creator profile portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChOOwjolQjtnCHxBbDpsJCh6oc6ohaJ8hrmVxvit2LGzVyrVzPJXjXJYbB37U_W9OFZxdothobS6ASS-D7_McJxKtG7-Jka3t_Fhjt3Gd51KSu0l2cF4lLZIRZfd_wiyw1Z7gGi2uG5O8W8_Va9Eci-liLPr4wQiXRqeQzyZN2caiO6Tq3OT66mqMaWXjbsLOCVmlJhUlmpJktNbKcMDaKkGuekkJbN_JVk2ZButMJFBhac_ZB3zY8urlPp2rpk-Riv-HQE6yYNAE"/>
+<div>
+<p class="text-sm font-semibold">Alex Rivera</p>
+<p class="text-xs text-slate-400">Pro Creator</p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-y-auto bg-mist dark:bg-background-dark pb-20 lg:ml-64">
+<!-- Top Header -->
+<header class="sticky top-0 z-30 bg-mist/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+<div class="flex flex-col">
+<div class="flex items-center text-xs text-slate-400 gap-1 mb-0.5">
+<span>Studio</span>
+<span class="material-icons text-xs">chevron_right</span>
+<span class="text-primary font-medium">Overview</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center text-slate-500 relative">
+<span class="material-icons">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-mist"></span>
+</button>
+<button class="btn-gradient text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-primary/20 flex items-center gap-2 active:scale-95 transition-transform">
+<span class="material-icons text-sm">add</span>
+          Create Post
+        </button>
+</div>
+</header>
+<!-- Content -->
+<div class="px-6 py-2 space-y-8 max-w-2xl mx-auto w-full">
+<!-- Welcome -->
+<section>
+<h1 class="text-2xl font-bold text-slate-900 dark:text-white">Good afternoon, Alex.</h1>
+<p class="text-slate-500 text-sm mt-1">Here is what's happening with your studio today.</p>
+</section>
+<!-- Quick Stats Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Revenue Card -->
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div class="w-10 h-10 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+<span class="material-icons">account_balance_wallet</span>
+</div>
+<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+12%</span>
+</div>
+<div>
+<p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Total Revenue</p>
+<p class="text-2xl font-bold mt-1 text-slate-800 dark:text-slate-100">$12,450</p>
+</div>
+</div>
+<!-- Members Card -->
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div class="w-10 h-10 bg-sky-50 dark:bg-sky-500/10 rounded-lg flex items-center justify-center text-sky-600 dark:text-sky-400">
+<span class="material-icons">people</span>
+</div>
+<span class="text-[10px] font-bold text-sky-600 bg-sky-50 px-2 py-1 rounded-full">+82</span>
+</div>
+<div>
+<p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Active Members</p>
+<p class="text-2xl font-bold mt-1 text-slate-800 dark:text-slate-100">1,240</p>
+</div>
+</div>
+<!-- Growth Card -->
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+<span class="material-icons">trending_up</span>
+</div>
+<div class="bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold tracking-tight">UP</div>
+</div>
+<div>
+<p class="text-xs text-slate-400 font-medium uppercase tracking-wider">30-Day Growth</p>
+<p class="text-2xl font-bold mt-1 text-slate-800 dark:text-slate-100">+15%</p>
+</div>
+</div>
+</section>
+<!-- Revenue Chart Card -->
+<section class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h3 class="font-bold text-slate-800 dark:text-white">Revenue Trend</h3>
+<p class="text-xs text-slate-400">Past 30 days performance</p>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1 text-[10px] font-bold rounded-md bg-slate-50 dark:bg-slate-800 text-slate-500">7D</button>
+<button class="px-3 py-1 text-[10px] font-bold rounded-md bg-primary text-white">30D</button>
+</div>
+</div>
+<!-- Mock SVG Line Chart -->
+<div class="relative h-48 w-full">
+<svg class="w-full h-full" viewbox="0 0 400 120">
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#8c2bee" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#8c2bee" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M 0 100 Q 40 80, 80 90 T 160 50 T 240 60 T 320 20 T 400 40 L 400 120 L 0 120 Z" fill="url(#chartGradient)"></path>
+<path d="M 0 100 Q 40 80, 80 90 T 160 50 T 240 60 T 320 20 T 400 40" fill="none" stroke="#8c2bee" stroke-linecap="round" stroke-width="3"></path>
+<!-- Data Points -->
+<circle cx="160" cy="50" fill="#8c2bee" r="4" stroke="white" stroke-width="2"></circle>
+<circle cx="320" cy="20" fill="#8c2bee" r="4" stroke="white" stroke-width="2"></circle>
+</svg>
+<!-- Tooltip Simulation -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg pointer-events-none">
+            May 14: $542.00
+          </div>
+</div>
+<div class="flex justify-between mt-4 px-2">
+<span class="text-[10px] text-slate-400 font-medium">Apr 24</span>
+<span class="text-[10px] text-slate-400 font-medium">May 04</span>
+<span class="text-[10px] text-slate-400 font-medium">May 14</span>
+<span class="text-[10px] text-slate-400 font-medium">Today</span>
+</div>
+</section>
+<!-- Activity Feed -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-bold text-slate-800 dark:text-white">Recent Activity</h3>
+<button class="text-primary text-xs font-semibold">View All</button>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 divide-y divide-slate-50 dark:divide-slate-800">
+<div class="p-4 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600">
+<span class="material-icons text-lg">person_add</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-slate-800 dark:text-slate-200">New Member joined</p>
+<p class="text-xs text-slate-400">Sarah Jenkins subscribed to 'Pro'</p>
+</div>
+<span class="text-[10px] text-slate-400 font-medium">2m ago</span>
+</div>
+<div class="p-4 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+<span class="material-icons text-lg">check_circle</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-slate-800 dark:text-slate-200">Payout processed</p>
+<p class="text-xs text-slate-400">A withdrawal of $850.00 was successful</p>
+</div>
+<span class="text-[10px] text-slate-400 font-medium">1h ago</span>
+</div>
+<div class="p-4 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-violet-50 dark:bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-icons text-lg">comment</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-slate-800 dark:text-slate-200">New Comment</p>
+<p class="text-xs text-slate-400">Marcus Lee: "This update is fire!"</p>
+</div>
+<span class="text-[10px] text-slate-400 font-medium">3h ago</span>
+</div>
+</div>
+</section>
+</div>
+<!-- iOS Bottom Navigation Bar (Tab Bar) -->
+<nav class="fixed bottom-0 inset-x-0 h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 flex items-center justify-around px-6 pb-4 pt-2 z-50">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-icons">dashboard</span>
+<span class="text-[10px] font-bold">Studio</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-icons">insights</span>
+<span class="text-[10px] font-medium">Analytics</span>
+</a>
+<div class="relative -top-6">
+<button class="btn-gradient w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl shadow-primary/40 border-4 border-mist dark:border-background-dark">
+<span class="material-icons text-3xl">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-icons">forum</span>
+<span class="text-[10px] font-medium">Social</span>
+</a>
+<a class="flex flex-col items-center gap-1" href="#">
+<img class="w-6 h-6 rounded-full object-cover grayscale opacity-70" data-alt="Creator profile small" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiDJyRdjItX3TAJI4rIk0Xdsb_YF0USQa-JLxlVZIH-X6RWR9vIy_xOyGZDrn-nUt9AeQw2UpqEWo96lbyxaXmuRw3BXnCG3r2lGYbYWPQHscG5FsZG4ajaaaSMlMYrOQxg2Tfa3Xm3dzf8qEpDP9hEKUj4MDZSCMZgULlQM3joxGJ5yJ7c3cZ3MgDXqOte7_fmUl1eeq53i7S6ID-CRi8KboLmKuE4J2VjqmeU0m0xGt-kYllBDXlmjholKVcCWiodA7qFdiRdak"/>
+<span class="text-[10px] font-medium text-slate-400">Profile</span>
+</a>
+</nav>
+</main>
+<!-- Side Overlay (for actual interaction feeling) -->
+<div class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 hidden" id="sidebarOverlay"></div>
+</body></html>

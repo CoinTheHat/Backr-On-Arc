@@ -9,7 +9,7 @@ const treasuryAddress = PLATFORM_TREASURY as Address;
 
 export function useSend() {
     const { address, isConnected } = useAccount();
-    const { data: walletClient } = useWalletClient();
+    const { data: walletClient, refetch: refetchWalletClient } = useWalletClient();
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [txHash, setTxHash] = useState<string | null>(null);
@@ -20,8 +20,28 @@ export function useSend() {
         setError(null);
         setTxHash(null);
 
-        if (!isConnected || !address || !walletClient) {
+        if (!isConnected || !address) {
             const errMsg = "No active wallet. Please connect your wallet first.";
+            setError(errMsg);
+            setIsSending(false);
+            throw new Error(errMsg);
+        }
+
+        // Wait for walletClient with retries
+        let wc = walletClient;
+        if (!wc) {
+            for (let i = 0; i < 5; i++) {
+                await new Promise(r => setTimeout(r, 300));
+                const refreshed = await refetchWalletClient();
+                if (refreshed.data) {
+                    wc = refreshed.data;
+                    break;
+                }
+            }
+        }
+
+        if (!wc) {
+            const errMsg = "Wallet client not ready. Please refresh the page and try again.";
             setError(errMsg);
             setIsSending(false);
             throw new Error(errMsg);
@@ -37,7 +57,7 @@ export function useSend() {
 
             // Transfer to creator (95%)
             console.log('[useSend] Sending to creator...');
-            const tx = await walletClient.writeContract({
+            const tx = await wc.writeContract({
                 address: usdcAddress,
                 abi: TIP20_ABI,
                 functionName: "transfer",
@@ -47,7 +67,7 @@ export function useSend() {
             // Transfer fee to treasury (5%)
             if (feeWei > BigInt(0)) {
                 console.log('[useSend] Sending platform fee...');
-                await walletClient.writeContract({
+                await wc.writeContract({
                     address: usdcAddress,
                     abi: TIP20_ABI,
                     functionName: "transfer",

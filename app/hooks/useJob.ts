@@ -9,19 +9,26 @@ const contractAddress = ERC8183_CONTRACT_ADDRESS as Address;
 
 export function useJob() {
     const { address, isConnected } = useAccount();
-    const { data: walletClient } = useWalletClient();
+    const { data: walletClient, refetch: refetchWalletClient } = useWalletClient();
     const publicClient = usePublicClient();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [txHash, setTxHash] = useState<string | null>(null);
 
-    const ensureWallet = () => {
-        if (!isConnected || !address || !walletClient) {
-            const errMsg = "No active wallet. Please connect your wallet first.";
-            setError(errMsg);
-            setIsLoading(false);
-            throw new Error(errMsg);
+    const ensureWallet = async () => {
+        if (!isConnected || !address) {
+            throw new Error("No active wallet. Please connect your wallet first.");
         }
+        let wc = walletClient;
+        if (!wc) {
+            for (let i = 0; i < 5; i++) {
+                await new Promise(r => setTimeout(r, 300));
+                const refreshed = await refetchWalletClient();
+                if (refreshed.data) { wc = refreshed.data; break; }
+            }
+        }
+        if (!wc) throw new Error("Wallet client not ready. Refresh the page.");
+        return wc;
     };
 
     const createJob = async (
@@ -35,11 +42,11 @@ export function useJob() {
         setError(null);
         setTxHash(null);
 
-        ensureWallet();
+        const wc = await ensureWallet();
 
         try {
             console.log('[useJob] Creating job...');
-            const tx = await walletClient!.writeContract({
+            const tx = await wc.writeContract({
                 address: contractAddress,
                 abi: ERC8183_ABI,
                 functionName: "createJob",
@@ -71,14 +78,14 @@ export function useJob() {
         setError(null);
         setTxHash(null);
 
-        ensureWallet();
+        const wc = await ensureWallet();
 
         try {
             const amountInWei = parseUnits(budget, 6);
 
             // Step 1: Set budget on the job
             console.log('[useJob] Setting budget...');
-            await walletClient!.writeContract({
+            await wc.writeContract({
                 address: contractAddress,
                 abi: ERC8183_ABI,
                 functionName: "setBudget",
@@ -89,7 +96,7 @@ export function useJob() {
 
             // Step 2: Approve USDC spend
             console.log('[useJob] Approving USDC spend...');
-            await walletClient!.writeContract({
+            await wc.writeContract({
                 address: usdcAddress,
                 abi: TIP20_ABI,
                 functionName: "approve",
@@ -100,7 +107,7 @@ export function useJob() {
 
             // Step 3: Fund the job
             console.log('[useJob] Funding job...');
-            const tx = await walletClient!.writeContract({
+            const tx = await wc.writeContract({
                 address: contractAddress,
                 abi: ERC8183_ABI,
                 functionName: "fund",
@@ -126,11 +133,11 @@ export function useJob() {
         setError(null);
         setTxHash(null);
 
-        ensureWallet();
+        const wc = await ensureWallet();
 
         try {
             console.log('[useJob] Submitting work...');
-            const tx = await walletClient!.writeContract({
+            const tx = await wc.writeContract({
                 address: contractAddress,
                 abi: ERC8183_ABI,
                 functionName: "submit",
@@ -156,11 +163,11 @@ export function useJob() {
         setError(null);
         setTxHash(null);
 
-        ensureWallet();
+        const wc = await ensureWallet();
 
         try {
             console.log('[useJob] Completing job...');
-            const tx = await walletClient!.writeContract({
+            const tx = await wc.writeContract({
                 address: contractAddress,
                 abi: ERC8183_ABI,
                 functionName: "complete",
@@ -186,11 +193,11 @@ export function useJob() {
         setError(null);
         setTxHash(null);
 
-        ensureWallet();
+        const wc = await ensureWallet();
 
         try {
             console.log('[useJob] Rejecting job...');
-            const tx = await walletClient!.writeContract({
+            const tx = await wc.writeContract({
                 address: contractAddress,
                 abi: ERC8183_ABI,
                 functionName: "reject",

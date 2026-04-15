@@ -15,7 +15,7 @@ interface SubscribeParams {
 
 export function useSubscribe() {
     const { address, isConnected } = useAccount();
-    const { data: walletClient } = useWalletClient();
+    const { data: walletClient, refetch: refetchWalletClient } = useWalletClient();
     const publicClient = usePublicClient();
     const [isSubscribing, setIsSubscribing] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -27,8 +27,24 @@ export function useSubscribe() {
         setError(null);
         setTxHash(null);
 
-        if (!isConnected || !address || !walletClient) {
+        if (!isConnected || !address) {
             const errMsg = "No active wallet. Please connect your wallet first.";
+            setError(errMsg);
+            setIsSubscribing(false);
+            throw new Error(errMsg);
+        }
+
+        // Wait for walletClient with retries
+        let wc = walletClient;
+        if (!wc) {
+            for (let i = 0; i < 5; i++) {
+                await new Promise(r => setTimeout(r, 300));
+                const refreshed = await refetchWalletClient();
+                if (refreshed.data) { wc = refreshed.data; break; }
+            }
+        }
+        if (!wc) {
+            const errMsg = "Wallet client not ready. Please refresh the page.";
             setError(errMsg);
             setIsSubscribing(false);
             throw new Error(errMsg);
@@ -39,7 +55,7 @@ export function useSubscribe() {
             const amountInWei = parseUnits(amount, 6);
 
             console.log('[useSubscribe] Approving token spend...');
-            await walletClient.writeContract({
+            await wc.writeContract({
                 address: usdcAddress,
                 abi: TIP20_ABI,
                 functionName: "approve",
@@ -51,7 +67,7 @@ export function useSubscribe() {
 
             // Step 2: Subscribe via contract
             console.log('[useSubscribe] Subscribing to tier...');
-            const subscribeTx = await walletClient.writeContract({
+            const subscribeTx = await wc.writeContract({
                 address: contractAddress as Address,
                 abi: SUBSCRIPTION_CONTRACT_ABI,
                 functionName: "subscribe",

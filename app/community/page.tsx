@@ -81,7 +81,7 @@ export default function CommunityPage() {
                                             {post.content}
                                         </p>
                                         <div className="flex gap-4 text-xs text-gray-400 font-medium">
-                                            <button className="hover:text-brand-primary transition-colors">Reply</button>
+                                            <button onClick={() => {}} className="hover:text-brand-primary transition-colors">Reply</button>
                                             <button className="hover:text-brand-primary transition-colors">Like {post.likes > 0 && `(${post.likes})`}</button>
                                         </div>
                                     </div>

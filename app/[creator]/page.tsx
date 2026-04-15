@@ -627,7 +627,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                             <div className="space-y-8">
                                 <div className="flex items-center justify-between">
                                     <h2 className="font-serif text-2xl font-bold text-slate-900">Recent Posts</h2>
-                                    <button className="text-primary font-bold text-sm hover:underline">View all</button>
+                                    <button onClick={() => setActiveTab('posts')} className="text-primary font-bold text-sm hover:underline">View all</button>
                                 </div>
 
                                 {/* Nanopayments Deposit Widget — shown only when creator has PPV posts */}

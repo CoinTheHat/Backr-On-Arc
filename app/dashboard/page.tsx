@@ -408,9 +408,9 @@ export default function StudioOverview() {
                         <p className="text-sm text-slate-400 mt-1">Past 30 days performance</p>
                     </div>
                     <div className="flex gap-2 bg-slate-50 p-1 rounded-xl">
-                        <button className="px-4 py-1.5 text-xs font-bold rounded-lg text-slate-500 hover:bg-white hover:shadow-sm transition-all">7D</button>
-                        <button className="px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-primary shadow-sm">30D</button>
-                        <button className="px-4 py-1.5 text-xs font-bold rounded-lg text-slate-500 hover:bg-white hover:shadow-sm transition-all">ALL</button>
+                        <button onClick={() => {}} className="px-4 py-1.5 text-xs font-bold rounded-lg text-slate-500 hover:bg-white hover:shadow-sm transition-all">7D</button>
+                        <button onClick={() => {}} className="px-4 py-1.5 text-xs font-bold rounded-lg bg-white text-primary shadow-sm">30D</button>
+                        <button onClick={() => {}} className="px-4 py-1.5 text-xs font-bold rounded-lg text-slate-500 hover:bg-white hover:shadow-sm transition-all">ALL</button>
                     </div>
                 </div>
 
@@ -432,7 +432,7 @@ export default function StudioOverview() {
             <section>
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-bold text-slate-900">Recent Activity</h3>
-                    <button className="text-primary text-sm font-bold hover:underline">View All</button>
+                    <button onClick={() => router.push('/dashboard/earnings')} className="text-primary text-sm font-bold hover:underline">View All</button>
                 </div>
 
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 divide-y divide-slate-50">

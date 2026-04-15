@@ -218,7 +218,7 @@ export default function FeedPage() {
                                             <button className="interaction-btn">❤️ <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>124</span></button>
                                             <button className="interaction-btn">💬 <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>24 comments</span></button>
                                         </div>
-                                        <button className="interaction-btn">↗ Share</button>
+                                        <button onClick={() => { navigator.clipboard.writeText(window.location.href); }} className="interaction-btn">↗ Share</button>
                                     </div>
                                 </div>
                             </div>

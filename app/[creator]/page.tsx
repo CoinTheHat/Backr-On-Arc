@@ -256,6 +256,9 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
         // Subscription Check
         if (activeSubscription) return true;
 
+        // PPV purchase check — API returns ppvRequired: false when purchased
+        if (post.ppvRequired === false && post.ppvEnabled) return true;
+
         return false;
     };
 

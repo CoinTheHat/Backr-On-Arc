@@ -12,6 +12,7 @@ import TipJar from '../components/TipJar';
 import SupporterLeaderboard from '../components/SupporterLeaderboard';
 import WalletButton from '../components/WalletButton';
 import { useSend } from '../hooks/useSend';
+import { useSubscribe } from '../hooks/useSubscribe';
 import { useNanopay } from '../hooks/useNanopay';
 import {
     ChevronLeft,
@@ -67,6 +68,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
 
     // Payment Hooks
     const { send, txHash: paymentTxHash } = useSend();
+    const { subscribe: onChainSubscribe, getCreatorContract } = useSubscribe();
     const { balance: gatewayBalance, deposit: nanopayDeposit, isLoading: nanopayLoading, error: nanopayError } = useNanopay();
 
     // Nanopayments Deposit Widget State
@@ -201,13 +203,31 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
         setCheckoutStatus('pending');
 
         try {
-            // Direct payment to creator (No contract deployment needed)
-            // This enables immediate monetization for all creators
-            const txHash = await send(
-                targetAddress,
-                tier.price.toString(),
-                `Subscribe to ${tier.name}`
-            );
+            let txHash: string | undefined;
+
+            // Check if creator has an on-chain subscription contract
+            const creatorContractAddr = creatorProfile?.contractAddress;
+            const hasContract = creatorContractAddr &&
+                creatorContractAddr !== '' &&
+                creatorContractAddr !== '0x0000000000000000000000000000000000000000';
+
+            if (hasContract) {
+                // On-chain subscribe: USDC approve + contract.subscribe(tierId)
+                console.log('[subscribe] Using on-chain contract:', creatorContractAddr);
+                txHash = await onChainSubscribe({
+                    contractAddress: creatorContractAddr,
+                    tierId: selectedTierIndex,
+                    amount: tier.price.toString(),
+                });
+            } else {
+                // Fallback: direct USDC transfer (for creators without contract)
+                console.log('[subscribe] Fallback: direct USDC transfer');
+                txHash = await send(
+                    targetAddress,
+                    tier.price.toString(),
+                    `Subscribe to ${tier.name}`
+                );
+            }
 
             if (!txHash) throw new Error("Transaction failed");
 
@@ -219,7 +239,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                     subscriberAddress: address,
                     creatorAddress: targetAddress,
                     tierId: tier.id,
-                    expiry: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+                    expiry: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60),
                     txHash
                 })
             });
@@ -228,7 +248,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             setCheckoutStatus('success');
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
 
-            // Refresh logic if needed
+            // Refresh subscription state
             if (address) {
                 fetch(`/api/subscriptions?subscriber=${address}&creator=${targetAddress}`)
                     .then(res => res.json())

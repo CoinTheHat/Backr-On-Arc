@@ -49,7 +49,7 @@ export default function PostsPage() {
     }, [address]);
 
     const fetchTiers = () => {
-        fetch(`/api/tiers?address=${address}`)
+        fetch(`/api/tiers?creator=${address}`)
             .then(res => res.json())
             .then(data => { if (Array.isArray(data)) setCreatorTiers(data); });
     };

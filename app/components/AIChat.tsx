@@ -168,14 +168,30 @@ export default function AIChat() {
                 const { to, amount } = action.params;
                 if (!to || !amount) throw new Error('Missing recipient or amount');
 
+                const totalWei = parseUnits(String(amount), 6);
+                const feeWei = (totalWei * BigInt(500)) / BigInt(10000); // 5%
+                const creatorWei = totalWei - feeWei;
+
+                // 95% to creator
                 const txHash = await activeWc.writeContract({
                     address: TOKENS.USDC as Address,
                     abi: TIP20_ABI,
                     functionName: 'transfer',
-                    args: [to as Address, parseUnits(String(amount), 6)],
+                    args: [to as Address, creatorWei],
                 });
 
-                updateStatus({ status: 'done', txHash, message: `Sent $${amount} USDC to ${to.slice(0, 8)}...` });
+                // 5% to platform treasury
+                if (feeWei > BigInt(0)) {
+                    const { PLATFORM_TREASURY } = await import('@/app/utils/constants');
+                    await activeWc.writeContract({
+                        address: TOKENS.USDC as Address,
+                        abi: TIP20_ABI,
+                        functionName: 'transfer',
+                        args: [PLATFORM_TREASURY as Address, feeWei],
+                    });
+                }
+
+                updateStatus({ status: 'done', txHash, message: `Sent $${amount} USDC to ${to.slice(0, 8)}... (5% platform fee applied)` });
             }
 
             else if (action.type === 'subscribe_tier') {

@@ -7,7 +7,7 @@ export async function GET(
 ) {
     const { id } = await params;
     const job = await db.jobs.getById(id);
-    if (!job) return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+    if (!job) return NextResponse.json({ error: 'Commission not found' }, { status: 404 });
     return NextResponse.json(job);
 }
 
@@ -21,26 +21,35 @@ export async function PUT(
         const { action, address, submissionResult, txHash } = body;
 
         const job = await db.jobs.getById(id);
-        if (!job) return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+        if (!job) return NextResponse.json({ error: 'Commission not found' }, { status: 404 });
 
         let updates: any = {};
 
         switch (action) {
-            case 'claim':
-                if (job.status !== 'open') return NextResponse.json({ error: 'Job not open' }, { status: 400 });
-                updates = { status: 'claimed', claimedBy: address, txHash };
+            case 'accept':
+                // Creator accepts the commission request
+                if (job.status !== 'open') return NextResponse.json({ error: 'Commission not open' }, { status: 400 });
+                updates = { status: 'claimed', txHash };
                 break;
             case 'submit':
-                if (job.status !== 'claimed') return NextResponse.json({ error: 'Job not claimed' }, { status: 400 });
+                // Creator submits the deliverable
+                if (job.status !== 'claimed') return NextResponse.json({ error: 'Commission not accepted yet' }, { status: 400 });
                 updates = { status: 'submitted', submissionResult, txHash };
                 break;
             case 'complete':
-                if (job.status !== 'submitted') return NextResponse.json({ error: 'Job not submitted' }, { status: 400 });
+                // Supporter approves the deliverable, funds released
+                if (job.status !== 'submitted') return NextResponse.json({ error: 'Commission not submitted' }, { status: 400 });
                 updates = { status: 'completed', txHash };
                 break;
             case 'reject':
-                if (job.status !== 'submitted') return NextResponse.json({ error: 'Job not submitted' }, { status: 400 });
+                // Supporter rejects the deliverable
+                if (job.status !== 'submitted') return NextResponse.json({ error: 'Commission not submitted' }, { status: 400 });
                 updates = { status: 'rejected', txHash };
+                break;
+            // Legacy support
+            case 'claim':
+                if (job.status !== 'open') return NextResponse.json({ error: 'Commission not open' }, { status: 400 });
+                updates = { status: 'claimed', claimedBy: address, txHash };
                 break;
             default:
                 return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
@@ -49,7 +58,7 @@ export async function PUT(
         const updated = await db.jobs.update(id, updates);
         return NextResponse.json(updated);
     } catch (e: any) {
-        console.error("Job Update Error:", e);
+        console.error("Commission Update Error:", e);
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

@@ -128,11 +128,12 @@ const initDb = async () => {
                 "createdAt" TIMESTAMP DEFAULT NOW()
             );
 
-            -- Jobs table (ERC-8183)
+            -- Jobs table (ERC-8183) — Content Commissions
             CREATE TABLE IF NOT EXISTS jobs (
                 id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
                 "onchainId" TEXT,
-                "creatorAddress" TEXT REFERENCES creators(address),
+                "creatorAddress" TEXT,
+                "requesterAddress" TEXT,
                 title TEXT,
                 description TEXT,
                 budget NUMERIC,
@@ -143,6 +144,9 @@ const initDb = async () => {
                 "createdAt" TIMESTAMP DEFAULT NOW(),
                 "updatedAt" TIMESTAMP DEFAULT NOW()
             );
+
+            -- Add requesterAddress if not exists (for existing tables)
+            ALTER TABLE jobs ADD COLUMN IF NOT EXISTS "requesterAddress" TEXT;
         `);
     } catch (err) {
         console.error('Error initializing DB:', err);
@@ -473,18 +477,25 @@ export const db = {
             const res = await pool.query('SELECT * FROM jobs WHERE LOWER("creatorAddress") = LOWER($1) ORDER BY "createdAt" DESC', [address]);
             return res.rows;
         },
+        getByRequester: async (address: string) => {
+            const res = await pool.query('SELECT * FROM jobs WHERE LOWER("requesterAddress") = LOWER($1) ORDER BY "createdAt" DESC', [address]);
+            return res.rows;
+        },
         getById: async (id: string) => {
             const res = await pool.query('SELECT * FROM jobs WHERE id = $1', [id]);
             return res.rows[0];
         },
         create: async (job: any) => {
             const query = `
-                INSERT INTO jobs ("onchainId", "creatorAddress", title, description, budget, status, "txHash")
-                VALUES ($1, $2, $3, $4, $5, 'open', $6)
+                INSERT INTO jobs ("onchainId", "creatorAddress", "requesterAddress", title, description, budget, status, "txHash")
+                VALUES ($1, $2, $3, $4, $5, $6, 'open', $7)
                 RETURNING *;
             `;
             const res = await pool.query(query, [
-                job.onchainId, job.creatorAddress.toLowerCase(), job.title, job.description, job.budget, job.txHash
+                job.onchainId,
+                job.creatorAddress ? job.creatorAddress.toLowerCase() : null,
+                job.requesterAddress ? job.requesterAddress.toLowerCase() : null,
+                job.title, job.description, job.budget, job.txHash
             ]);
             return res.rows[0];
         },

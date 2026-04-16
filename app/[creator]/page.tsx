@@ -31,7 +31,11 @@ import {
     LogOut,
     LayoutDashboard,
     User,
-    Loader2
+    Loader2,
+    MessageSquarePlus,
+    DollarSign,
+    Send,
+    CheckCircle,
 } from 'lucide-react';
 
 export default function CreatorPage({ params }: { params: Promise<{ creator: string }> }) {
@@ -98,6 +102,14 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const [commentContent, setCommentContent] = useState('');
     const [isCommenting, setIsCommenting] = useState(false);
     const [postComments, setPostComments] = useState<any[]>([]);
+
+    // Commission Request State
+    const [showCommissionForm, setShowCommissionForm] = useState(false);
+    const [commissionTitle, setCommissionTitle] = useState('');
+    const [commissionDescription, setCommissionDescription] = useState('');
+    const [commissionBudget, setCommissionBudget] = useState('');
+    const [isSubmittingCommission, setIsSubmittingCommission] = useState(false);
+    const [commissionSuccess, setCommissionSuccess] = useState(false);
 
     // Fetch Data
     useEffect(() => {
@@ -353,6 +365,43 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             console.error("Error submitting comment:", error);
         } finally {
             setIsCommenting(false);
+        }
+    };
+
+    const handleCommissionSubmit = async () => {
+        if (!address || !commissionTitle || !commissionBudget || !creatorProfile?.address) return;
+        setIsSubmittingCommission(true);
+        try {
+            const res = await fetch('/api/jobs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requesterAddress: address,
+                    creatorAddress: creatorProfile.address,
+                    title: commissionTitle,
+                    description: commissionDescription,
+                    budget: commissionBudget,
+                }),
+            });
+            if (res.ok) {
+                setCommissionSuccess(true);
+                setCommissionTitle('');
+                setCommissionDescription('');
+                setCommissionBudget('');
+                showToast('Commission request sent!', 'success');
+                setTimeout(() => {
+                    setCommissionSuccess(false);
+                    setShowCommissionForm(false);
+                }, 2000);
+            } else {
+                const err = await res.json();
+                showToast(err.error || 'Failed to submit request', 'error');
+            }
+        } catch (err) {
+            console.error('Commission submit error:', err);
+            showToast('Failed to submit request. Please try again.', 'error');
+        } finally {
+            setIsSubmittingCommission(false);
         }
     };
 
@@ -1012,6 +1061,124 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
 
                     {/* Leaderboard - only show wrapper if component renders content */}
                     <SupporterLeaderboard creatorAddress={creatorId} />
+
+                    {/* Commission Request Card - visible to supporters (not the creator themselves) */}
+                    {address && creatorProfile?.address?.toLowerCase() !== address?.toLowerCase() && (
+                        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                            {!showCommissionForm ? (
+                                <div className="text-center">
+                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center mx-auto mb-4 text-indigo-500">
+                                        <MessageSquarePlus size={24} />
+                                    </div>
+                                    <h4 className="font-bold text-slate-900 mb-1">Request Custom Content</h4>
+                                    <p className="text-xs text-slate-500 mb-4">Pay {displayName} USDC to create something just for you</p>
+                                    <button
+                                        onClick={() => setShowCommissionForm(true)}
+                                        className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-all active:scale-[0.98] shadow-lg shadow-indigo-200/50"
+                                    >
+                                        <span className="flex items-center justify-center gap-2">
+                                            <MessageSquarePlus size={16} />
+                                            Request Content
+                                        </span>
+                                    </button>
+                                </div>
+                            ) : commissionSuccess ? (
+                                <div className="text-center py-4">
+                                    <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4 text-emerald-500">
+                                        <CheckCircle size={28} />
+                                    </div>
+                                    <h4 className="font-bold text-slate-900 mb-1">Request Sent!</h4>
+                                    <p className="text-xs text-slate-500">{displayName} will see your commission request.</p>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                            <MessageSquarePlus size={16} className="text-indigo-500" />
+                                            Request from {displayName}
+                                        </h4>
+                                        <button
+                                            onClick={() => setShowCommissionForm(false)}
+                                            className="text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                            <X size={18} />
+                                        </button>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                                                What would you like {displayName} to create?
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={commissionTitle}
+                                                onChange={(e) => setCommissionTitle(e.target.value)}
+                                                placeholder="e.g. A personalized video shoutout"
+                                                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                                                Details (optional)
+                                            </label>
+                                            <textarea
+                                                value={commissionDescription}
+                                                onChange={(e) => setCommissionDescription(e.target.value)}
+                                                placeholder="Describe what you want in detail..."
+                                                rows={3}
+                                                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 resize-vertical"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 mb-1">
+                                                Budget (USDC)
+                                            </label>
+                                            <div className="flex gap-2 mb-2">
+                                                {['5', '10', '25', '50'].map((preset) => (
+                                                    <button
+                                                        key={preset}
+                                                        type="button"
+                                                        onClick={() => setCommissionBudget(preset)}
+                                                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+                                                            commissionBudget === preset
+                                                                ? 'bg-indigo-500 text-white shadow-md'
+                                                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                                        }`}
+                                                    >
+                                                        ${preset}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="relative">
+                                                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                                <input
+                                                    type="number"
+                                                    value={commissionBudget}
+                                                    onChange={(e) => setCommissionBudget(e.target.value)}
+                                                    placeholder="Custom amount"
+                                                    min="1"
+                                                    step="any"
+                                                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
+                                                />
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={handleCommissionSubmit}
+                                            disabled={isSubmittingCommission || !commissionTitle || !commissionBudget}
+                                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-200/50"
+                                        >
+                                            {isSubmittingCommission ? (
+                                                <Loader2 size={16} className="animate-spin" />
+                                            ) : (
+                                                <Send size={16} />
+                                            )}
+                                            {isSubmittingCommission ? 'Sending...' : `Send Request (${commissionBudget || '0'} USDC)`}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </aside>
 
                 {/* Mobile: Bottom Tip Jar */}

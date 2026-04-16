@@ -372,6 +372,17 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
         if (!address || !commissionTitle || !commissionBudget || !creatorProfile?.address) return;
         setIsSubmittingCommission(true);
         try {
+            // Step 1: Pay the commission budget via USDC (goes to creator with 5% fee)
+            showToast('Confirm payment in your wallet...', 'info');
+            const txHash = await send(
+                creatorProfile.address,
+                commissionBudget,
+                `Commission: ${commissionTitle}`
+            );
+
+            if (!txHash) throw new Error('Payment failed');
+
+            // Step 2: Record the commission in DB (with txHash as proof of payment)
             const res = await fetch('/api/jobs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -381,6 +392,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                     title: commissionTitle,
                     description: commissionDescription,
                     budget: commissionBudget,
+                    txHash,
                 }),
             });
             if (res.ok) {
@@ -388,7 +400,8 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 setCommissionTitle('');
                 setCommissionDescription('');
                 setCommissionBudget('');
-                showToast('Commission request sent!', 'success');
+                showToast('Commission paid & sent!', 'success');
+                confetti({ particleCount: 60, spread: 50, origin: { y: 0.7 } });
                 setTimeout(() => {
                     setCommissionSuccess(false);
                     setShowCommissionForm(false);
@@ -397,9 +410,13 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 const err = await res.json();
                 showToast(err.error || 'Failed to submit request', 'error');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Commission submit error:', err);
-            showToast('Failed to submit request. Please try again.', 'error');
+            if (err.message?.includes('User rejected')) {
+                showToast('Payment cancelled', 'info');
+            } else {
+                showToast(err.message?.slice(0, 80) || 'Failed to submit request.', 'error');
+            }
         } finally {
             setIsSubmittingCommission(false);
         }

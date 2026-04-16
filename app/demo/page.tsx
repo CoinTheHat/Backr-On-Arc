@@ -209,7 +209,7 @@ export default function DemoPage() {
                             className="flex-1 bg-slate-900 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-800 transition-all disabled:opacity-50 text-lg"
                         >
                             <Play size={24} />
-                            {completedSteps > 0 ? 'Run Again' : `Run Full Demo (${steps.length} steps)`}
+                            {completedSteps > 0 ? 'Run Again (~30 tx)' : `Run Full Demo (${steps.length} steps, ~30 transactions)`}
                         </button>
                         {completedSteps > 0 && (
                             <button

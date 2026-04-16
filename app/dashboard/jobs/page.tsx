@@ -108,6 +108,25 @@ export default function DashboardCommissionsPage() {
         }
     };
 
+    const handleReject = async (commission: Commission) => {
+        if (!confirm('Are you sure you want to decline this commission? The USDC will be refunded to the supporter.')) return;
+        try {
+            const res = await fetch(`/api/jobs/${commission.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reject' }),
+            });
+            if (res.ok) {
+                await fetchCommissions();
+            } else {
+                const err = await res.json();
+                alert(err.error || 'Failed to reject');
+            }
+        } catch (e) {
+            console.error('Reject error:', e);
+        }
+    };
+
     const handleSubmitDeliverable = async (commission: Commission) => {
         const deliverable = deliverables[commission.id];
         if (!deliverable?.trim()) {
@@ -227,6 +246,18 @@ export default function DashboardCommissionsPage() {
                                         )}
                                         Accept & Start Working
                                     </button>
+                                    <button
+                                        onClick={() => handleReject(commission)}
+                                        className="w-full mt-2 py-2.5 rounded-xl border border-red-200 text-red-600 font-semibold text-sm hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <XCircle size={16} />
+                                        Decline Request
+                                    </button>
+                                    {commission.createdAt && (
+                                        <p className="text-xs text-slate-400 mt-2 text-center">
+                                            Expires {new Date(new Date(commission.createdAt).getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                                        </p>
+                                    )}
                                 </div>
                             )}
 

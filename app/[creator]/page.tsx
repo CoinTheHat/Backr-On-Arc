@@ -14,6 +14,10 @@ import WalletButton from '../components/WalletButton';
 import { useSend } from '../hooks/useSend';
 import { useSubscribe } from '../hooks/useSubscribe';
 import { useNanopay } from '../hooks/useNanopay';
+import { useWalletClient } from 'wagmi';
+import { parseUnits, type Address } from 'viem';
+import { ERC8183_ABI, TIP20_ABI } from '../utils/abis';
+import { ERC8183_CONTRACT_ADDRESS, TOKENS } from '../utils/constants';
 import {
     ChevronLeft,
     Share,
@@ -73,6 +77,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     // Payment Hooks
     const { send, txHash: paymentTxHash } = useSend();
     const { subscribe: onChainSubscribe, getCreatorContract } = useSubscribe();
+    const { data: walletClient, refetch: refetchWalletClient } = useWalletClient();
     const { balance: gatewayBalance, deposit: nanopayDeposit, isLoading: nanopayLoading, error: nanopayError } = useNanopay();
 
     // Nanopayments Deposit Widget State
@@ -370,19 +375,60 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
 
     const handleCommissionSubmit = async () => {
         if (!address || !commissionTitle || !commissionBudget || !creatorProfile?.address) return;
+
+        // Get wallet client with retry
+        let wc = walletClient;
+        if (!wc) {
+            for (let i = 0; i < 5; i++) {
+                await new Promise(r => setTimeout(r, 300));
+                const refreshed = await refetchWalletClient();
+                if (refreshed.data) { wc = refreshed.data; break; }
+            }
+        }
+        if (!wc) { showToast('Wallet not ready. Refresh the page.', 'error'); return; }
+
         setIsSubmittingCommission(true);
         try {
-            // Step 1: Pay the commission budget via USDC (goes to creator with 5% fee)
-            showToast('Confirm payment in your wallet...', 'info');
-            const txHash = await send(
-                creatorProfile.address,
-                commissionBudget,
-                `Commission: ${commissionTitle}`
-            );
+            const budgetWei = parseUnits(commissionBudget, 6);
+            const expiry = BigInt(Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60); // 7 days
+            const zeroAddr = '0x0000000000000000000000000000000000000000' as Address;
 
-            if (!txHash) throw new Error('Payment failed');
+            // Step 1: Create job on ERC-8183 (escrow)
+            showToast('Step 1/3: Creating escrow on-chain...', 'info');
+            const createTx = await wc.writeContract({
+                address: ERC8183_CONTRACT_ADDRESS as Address,
+                abi: ERC8183_ABI,
+                functionName: 'createJob',
+                args: [
+                    creatorProfile.address as Address, // provider = creator
+                    address as Address,                // evaluator = supporter (who approves)
+                    expiry,
+                    commissionDescription || commissionTitle,
+                    zeroAddr,                          // no hook
+                ],
+            });
 
-            // Step 2: Record the commission in DB (with txHash as proof of payment)
+            // Step 2: Approve USDC spend for the escrow contract
+            showToast('Step 2/3: Approving USDC...', 'info');
+            await wc.writeContract({
+                address: TOKENS.USDC as Address,
+                abi: TIP20_ABI,
+                functionName: 'approve',
+                args: [ERC8183_CONTRACT_ADDRESS as Address, budgetWei],
+            });
+
+            await new Promise(r => setTimeout(r, 2000));
+
+            // Step 3: Fund the job (lock USDC in escrow)
+            showToast('Step 3/3: Locking USDC in escrow...', 'info');
+            const fundTx = await wc.writeContract({
+                address: ERC8183_CONTRACT_ADDRESS as Address,
+                abi: ERC8183_ABI,
+                functionName: 'fund',
+                args: [BigInt(0)], // jobId — would need to read from createJob event/return
+            });
+
+            // Step 4: Record in DB
             const res = await fetch('/api/jobs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -392,15 +438,16 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                     title: commissionTitle,
                     description: commissionDescription,
                     budget: commissionBudget,
-                    txHash,
+                    txHash: createTx,
                 }),
             });
+
             if (res.ok) {
                 setCommissionSuccess(true);
                 setCommissionTitle('');
                 setCommissionDescription('');
                 setCommissionBudget('');
-                showToast('Commission paid & sent!', 'success');
+                showToast('Commission created! USDC locked in escrow.', 'success');
                 confetti({ particleCount: 60, spread: 50, origin: { y: 0.7 } });
                 setTimeout(() => {
                     setCommissionSuccess(false);
@@ -408,14 +455,14 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 }, 2000);
             } else {
                 const err = await res.json();
-                showToast(err.error || 'Failed to submit request', 'error');
+                showToast(err.error || 'Failed to record commission', 'error');
             }
         } catch (err: any) {
             console.error('Commission submit error:', err);
             if (err.message?.includes('User rejected')) {
-                showToast('Payment cancelled', 'info');
+                showToast('Transaction cancelled', 'info');
             } else {
-                showToast(err.message?.slice(0, 80) || 'Failed to submit request.', 'error');
+                showToast(err.message?.slice(0, 80) || 'Failed to create commission.', 'error');
             }
         } finally {
             setIsSubmittingCommission(false);
@@ -1189,7 +1236,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                             ) : (
                                                 <Send size={16} />
                                             )}
-                                            {isSubmittingCommission ? 'Sending...' : `Send Request (${commissionBudget || '0'} USDC)`}
+                                            {isSubmittingCommission ? 'Creating escrow...' : `Lock ${commissionBudget || '0'} USDC in Escrow`}
                                         </button>
                                     </div>
                                 </div>

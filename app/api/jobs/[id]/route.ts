@@ -42,8 +42,10 @@ export async function PUT(
                 updates = { status: 'completed', txHash };
                 break;
             case 'reject':
-                // Supporter rejects the deliverable
-                if (job.status !== 'submitted') return NextResponse.json({ error: 'Commission not submitted' }, { status: 400 });
+                // Creator declines open request OR supporter rejects submitted deliverable
+                if (job.status !== 'open' && job.status !== 'submitted') {
+                    return NextResponse.json({ error: 'Commission cannot be rejected in current state' }, { status: 400 });
+                }
                 updates = { status: 'rejected', txHash };
                 break;
             // Legacy support

@@ -226,6 +226,12 @@ export default function StudioOverview() {
                     )}
                 </section>
 
+                {/* My Commission Requests */}
+                <section>
+                    <h2 className="text-xl font-bold text-slate-900 mb-4">My Commission Requests</h2>
+                    <MyCommissions address={address} />
+                </section>
+
                 {/* Become a creator CTA */}
                 <section className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-3xl p-6">
                     <div className="flex items-start gap-4">
@@ -456,6 +462,68 @@ export default function StudioOverview() {
                     )}
                 </div>
             </section>
+        </div>
+    );
+}
+
+// Supporter's outgoing commission requests component
+function MyCommissions({ address }: { address: string | undefined }) {
+    const [commissions, setCommissions] = useState<any[]>([]);
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        if (!address) return;
+        fetch(`/api/jobs?requester=${address}`)
+            .then(r => r.json())
+            .then(d => { if (Array.isArray(d)) setCommissions(d); })
+            .catch(() => {})
+            .finally(() => setLoaded(true));
+    }, [address]);
+
+    if (!loaded) return null;
+
+    const statusColors: Record<string, string> = {
+        open: 'bg-blue-100 text-blue-700',
+        claimed: 'bg-amber-100 text-amber-700',
+        submitted: 'bg-purple-100 text-purple-700',
+        completed: 'bg-emerald-100 text-emerald-700',
+        rejected: 'bg-red-100 text-red-700',
+    };
+
+    const statusLabels: Record<string, string> = {
+        open: 'Waiting for creator',
+        claimed: 'Creator working on it',
+        submitted: 'Review deliverable',
+        completed: 'Completed',
+        rejected: 'Declined',
+    };
+
+    if (commissions.length === 0) {
+        return (
+            <div className="bg-white rounded-2xl p-8 border border-dashed border-slate-200 text-center">
+                <Briefcase size={32} className="text-slate-300 mx-auto mb-3" />
+                <p className="text-sm text-slate-500 mb-2">No commission requests yet</p>
+                <p className="text-xs text-slate-400">Visit a creator's profile to request custom content</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-3">
+            {commissions.map((c: any) => (
+                <div key={c.id} className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <Briefcase size={18} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="font-bold text-slate-900 text-sm truncate">{c.title}</p>
+                        <p className="text-xs text-slate-500">${c.budget} USDC • {new Date(c.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${statusColors[c.status] || 'bg-slate-100 text-slate-600'}`}>
+                        {statusLabels[c.status] || c.status}
+                    </span>
+                </div>
+            ))}
         </div>
     );
 }

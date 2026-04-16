@@ -140,6 +140,7 @@ SUPPORTER EXECUTE ACTIONS (available to all users):
 - send_tip: {"to":"0x...","amount":"0.5"} — Sends direct USDC tip (5% platform fee applied)
 - subscribe_tier: {"creator":"username","tier":"Gold"} — Subscribes to a creator's tier
 - unlock_ppv: {"postId":"abc","amount":"0.005","creatorAddress":"0x..."} — Pays to unlock a PPV post
+- request_commission: {"creator":"username","title":"Write an article about DeFi","description":"Deep dive...","budget":"10"} — Requests custom content from a creator with USDC budget
 `;
 
             systemPrompt = `You are the AI agent for Backr, a creator membership platform on Arc Network (blockchain) with USDC payments and nanopayments.
@@ -160,8 +161,9 @@ CRITICAL EXECUTE RULES:
 - For subscribe_tier: look up creator by name/username from ACTIVE CREATORS list in context
 - For create_post: if user says "make a $0.005 PPV post about X", set ppvPrice and isPublic=false
 - For create_commission: default budget is $1 if not specified
-- Turkish triggers: "tier oluştur", "post at", "commission aç", "üye ol", "kazancımı çek", "withdraw et", "ödeme yap"
-- English triggers: "create tier", "make a post", "subscribe to", "withdraw earnings", "deposit"
+- Turkish triggers: "tier oluştur", "post at", "commission aç", "üye ol", "kazancımı çek", "withdraw et", "ödeme yap", "içerik iste", "commission gönder"
+- English triggers: "create tier", "make a post", "subscribe to", "withdraw earnings", "deposit", "request content from", "commission from"
+- For request_commission: look up the creator name/username from ACTIVE CREATORS list, resolve to creatorAddress
 - Don't invent addresses — use creator context data for lookups
 - If user doesn't specify a price, ask once. If they say "cheap" or "standard", use sensible defaults ($5 tier, $5 gateway deposit)
 - ALWAYS confirm what you did AFTER executing, don't ask before

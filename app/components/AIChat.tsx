@@ -16,7 +16,7 @@ interface NavAction {
 }
 
 interface ExecAction {
-    type: 'create_tier' | 'deposit_gateway' | 'withdraw_gateway' | 'send_tip' | 'subscribe_tier' | 'withdraw_earnings' | 'create_post' | 'create_commission' | 'unlock_ppv' | 'navigate';
+    type: 'create_tier' | 'deposit_gateway' | 'withdraw_gateway' | 'send_tip' | 'subscribe_tier' | 'withdraw_earnings' | 'create_post' | 'create_commission' | 'request_commission' | 'unlock_ppv' | 'navigate';
     params: any;
     status: 'pending' | 'running' | 'done' | 'error';
     txHash?: string;
@@ -409,6 +409,49 @@ export default function AIChat() {
                 updateStatus({ status: 'done', txHash, message: `Post unlocked for $${amount}` });
             }
 
+            else if (action.type === 'request_commission') {
+                const { creator, title, description, budget } = action.params;
+                if (!creator || !title || !budget) throw new Error('Missing creator, title, or budget');
+
+                updateStatus({ status: 'running', message: `Looking up ${creator}...` });
+
+                // Resolve creator address
+                let creatorAddress: string | null = null;
+                if (creator.startsWith('0x') && creator.length === 42) {
+                    creatorAddress = creator;
+                } else {
+                    const findRes = await fetch('/api/find', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ identifier: creator })
+                    });
+                    const findData = await findRes.json();
+                    if (!findData.success) throw new Error(`Creator "${creator}" not found`);
+                    creatorAddress = findData.address;
+                }
+
+                updateStatus({ status: 'running', message: 'Submitting commission request...' });
+
+                const res = await fetch('/api/jobs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        requesterAddress: address,
+                        creatorAddress,
+                        title,
+                        description: description || '',
+                        budget: String(budget),
+                    }),
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Failed to submit commission');
+                }
+
+                updateStatus({ status: 'done', message: `Commission "${ title}" sent to ${creator} ($${budget} USDC budget)` });
+            }
+
             else {
                 throw new Error(`Unknown action type: ${action.type}`);
             }
@@ -539,6 +582,7 @@ export default function AIChat() {
                                                     {action.type === 'withdraw_earnings' && `Withdraw creator earnings`}
                                                     {action.type === 'create_post' && `New post: ${action.params.title}`}
                                                     {action.type === 'create_commission' && `Commission: ${action.params.title} ($${action.params.budget})`}
+                                                    {action.type === 'request_commission' && `Request: ${action.params.title} → ${action.params.creator}`}
                                                     {action.type === 'unlock_ppv' && `Unlock post for $${action.params.amount}`}
                                                 </span>
                                             </div>

@@ -33,28 +33,50 @@ export default function DemoPage() {
         { id: 'batch', label: 'Batch Nano-Tips (x10)', description: '10 rapid $0.001 tips — demonstrating nano-payment frequency', icon: <Zap size={16} />, status: 'pending' },
     ]);
 
-    // Fetch current tx count
+    // Fetch current tx count from DB
+    const refreshTxCount = async () => {
+        try {
+            const r = await fetch('/api/stats/global');
+            const d = await r.json();
+            setTxCount(d.total || 0);
+        } catch {}
+    };
+
+    useEffect(() => { refreshTxCount(); }, []);
+
+    // Restore step state from localStorage
     useEffect(() => {
-        fetch('/api/stats/global')
-            .then(r => r.json())
-            .then(d => setTxCount(d.total || 0))
-            .catch(() => {});
+        try {
+            const saved = localStorage.getItem('demo-steps');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                setSteps(prev => prev.map(s => {
+                    const saved = parsed.find((p: any) => p.id === s.id);
+                    return saved ? { ...s, status: saved.status, txHash: saved.txHash, result: saved.result } : s;
+                }));
+            }
+        } catch {}
     }, []);
 
     const updateStep = (id: string, updates: Partial<Step>) => {
-        setSteps(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+        setSteps(prev => {
+            const next = prev.map(s => s.id === id ? { ...s, ...updates } : s);
+            // Save to localStorage
+            try {
+                localStorage.setItem('demo-steps', JSON.stringify(next.map(s => ({ id: s.id, status: s.status, txHash: s.txHash, result: s.result }))));
+            } catch {}
+            return next;
+        });
     };
 
     const runDemo = async () => {
         if (!isConnected || !address) return;
         setIsRunning(true);
-        let count = txCount;
 
-        // Helper: run a send and count it
+        // Helper: run a send and count it (useSend does 2 txs: creator + fee)
         const doSend = async (to: string, amount: string) => {
             const tx = await send(to, amount);
-            count++;
-            setTxCount(count);
+            await refreshTxCount(); // refresh from DB for accurate count
             return tx;
         };
 
@@ -116,7 +138,14 @@ export default function DemoPage() {
         }
         updateStep('batch', { status: 'done', result: `${batchSuccess}/10 nano-tips sent` });
 
+        await refreshTxCount();
         setIsRunning(false);
+    };
+
+    const resetDemo = () => {
+        setSteps(prev => prev.map(s => ({ ...s, status: 'pending' as const, txHash: undefined, result: undefined })));
+        localStorage.removeItem('demo-steps');
+        refreshTxCount();
     };
 
     const completedSteps = steps.filter(s => s.status === 'done').length;
@@ -172,15 +201,25 @@ export default function DemoPage() {
                 </div>
 
                 {/* Run Button */}
-                {!isRunning && completedSteps === 0 && (
-                    <button
-                        onClick={runDemo}
-                        disabled={!isConnected}
-                        className="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl mb-8 flex items-center justify-center gap-3 hover:bg-slate-800 transition-all disabled:opacity-50 text-lg"
-                    >
-                        <Play size={24} />
-                        Run Full Demo ({steps.length} steps, ~20 transactions)
-                    </button>
+                {!isRunning && (
+                    <div className="flex gap-3 mb-8">
+                        <button
+                            onClick={runDemo}
+                            disabled={!isConnected}
+                            className="flex-1 bg-slate-900 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-800 transition-all disabled:opacity-50 text-lg"
+                        >
+                            <Play size={24} />
+                            {completedSteps > 0 ? 'Run Again' : `Run Full Demo (${steps.length} steps)`}
+                        </button>
+                        {completedSteps > 0 && (
+                            <button
+                                onClick={resetDemo}
+                                className="px-6 py-4 rounded-2xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all"
+                            >
+                                Reset
+                            </button>
+                        )}
+                    </div>
                 )}
 
                 {!isConnected && (

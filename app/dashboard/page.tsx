@@ -17,6 +17,7 @@ import {
     Bot,
     Zap,
     ArrowRight,
+    XCircle,
     FileText,
     Crown,
     Play,
@@ -470,15 +471,43 @@ export default function StudioOverview() {
 function MyCommissions({ address }: { address: string | undefined }) {
     const [commissions, setCommissions] = useState<any[]>([]);
     const [loaded, setLoaded] = useState(false);
+    const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-    useEffect(() => {
+    const fetchCommissions = () => {
         if (!address) return;
         fetch(`/api/jobs?requester=${address}`)
             .then(r => r.json())
             .then(d => { if (Array.isArray(d)) setCommissions(d); })
             .catch(() => {})
             .finally(() => setLoaded(true));
+    };
+
+    useEffect(() => {
+        fetchCommissions();
     }, [address]);
+
+    const handleAction = async (commissionId: number, action: string) => {
+        const actionKey = `${commissionId}-${action}`;
+        setActionLoading(actionKey);
+        try {
+            const res = await fetch(`/api/jobs/${commissionId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action }),
+            });
+            if (res.ok) {
+                fetchCommissions();
+            } else {
+                const err = await res.json();
+                alert(err.error || `Failed to ${action} commission`);
+            }
+        } catch (e) {
+            console.error(`${action} error:`, e);
+            alert(`Failed to ${action} commission.`);
+        } finally {
+            setActionLoading(null);
+        }
+    };
 
     if (!loaded) return null;
 
@@ -511,17 +540,61 @@ function MyCommissions({ address }: { address: string | undefined }) {
     return (
         <div className="space-y-3">
             {commissions.map((c: any) => (
-                <div key={c.id} className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                        <Briefcase size={18} />
+                <div key={c.id} className="bg-white p-4 rounded-2xl border border-slate-100">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                            <Briefcase size={18} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-bold text-slate-900 text-sm truncate">{c.title}</p>
+                            <p className="text-xs text-slate-500">${c.budget} USDC • {new Date(c.createdAt).toLocaleDateString()}</p>
+                        </div>
+                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${statusColors[c.status] || 'bg-slate-100 text-slate-600'}`}>
+                            {statusLabels[c.status] || c.status}
+                        </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="font-bold text-slate-900 text-sm truncate">{c.title}</p>
-                        <p className="text-xs text-slate-500">${c.budget} USDC • {new Date(c.createdAt).toLocaleDateString()}</p>
-                    </div>
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${statusColors[c.status] || 'bg-slate-100 text-slate-600'}`}>
-                        {statusLabels[c.status] || c.status}
-                    </span>
+
+                    {/* Supporter action buttons when deliverable is submitted */}
+                    {c.status === 'submitted' && (
+                        <div className="mt-3 pt-3 border-t border-slate-100">
+                            {c.submissionResult && (
+                                <div className="mb-3 p-3 bg-slate-50 rounded-xl text-sm text-slate-600">
+                                    <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Deliverable</span>
+                                    {c.submissionResult}
+                                </div>
+                            )}
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => handleAction(c.id, 'complete')}
+                                    disabled={actionLoading === `${c.id}-complete`}
+                                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                                >
+                                    <CheckCircle size={14} />
+                                    {actionLoading === `${c.id}-complete` ? 'Processing...' : 'Approve & Release USDC'}
+                                </button>
+                                <button
+                                    onClick={() => handleAction(c.id, 'revise')}
+                                    disabled={actionLoading === `${c.id}-revise`}
+                                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 transition-colors disabled:opacity-50"
+                                >
+                                    <ArrowRight size={14} />
+                                    {actionLoading === `${c.id}-revise` ? 'Processing...' : 'Request Revision'}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (confirm('Reject this deliverable and refund USDC?')) {
+                                            handleAction(c.id, 'reject');
+                                        }
+                                    }}
+                                    disabled={actionLoading === `${c.id}-reject`}
+                                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-red-200 text-red-600 text-xs font-bold hover:bg-red-50 transition-colors disabled:opacity-50"
+                                >
+                                    <XCircle size={14} />
+                                    {actionLoading === `${c.id}-reject` ? 'Processing...' : 'Reject & Refund'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             ))}
         </div>

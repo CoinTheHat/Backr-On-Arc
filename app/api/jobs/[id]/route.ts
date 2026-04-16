@@ -41,6 +41,13 @@ export async function PUT(
                 if (job.status !== 'submitted') return NextResponse.json({ error: 'Commission not submitted' }, { status: 400 });
                 updates = { status: 'completed', txHash };
                 break;
+            case 'revise':
+                // Supporter requests revision — sends back to 'claimed' so creator can rework
+                if (job.status !== 'submitted') {
+                    return NextResponse.json({ error: 'Commission not in submitted state' }, { status: 400 });
+                }
+                updates = { status: 'claimed', submissionResult: null };
+                break;
             case 'reject':
                 // Creator declines open request OR supporter rejects submitted deliverable
                 if (job.status !== 'open' && job.status !== 'submitted') {

@@ -36,7 +36,25 @@ function demoWallet(seed) {
     return acc.address;
 }
 
+// User-owned test wallet — unlocks against @eli_test land real USDC here so
+// you can verify the transfer on ArcScan.
+const TEST_WALLET = '0xEc499d6561Dfef8115B21E7Bae883967e56F6728';
+
 const CREATORS = [
+    {
+        // Controlled test wallet — USDC lands here when any of eli_test's
+        // PPV posts are unlocked on-chain. Used for demo verification.
+        address: TEST_WALLET,
+        username: 'eli_test',
+        name: 'Eli Test',
+        bio: 'Controlled test wallet for demo verification. Unlock my posts to see USDC land on ArcScan.',
+        cat: 'Demo & Testing',
+        posts: [
+            { title: 'DEMO: Unlock me to fire a real on-chain USDC transfer', price: 0.005 },
+            { title: 'DEMO: $0.001 micro-unlock — tiny but real', price: 0.001 },
+            { title: 'DEMO: $0.01 long read — biggest payment', price: 0.01 },
+        ],
+    },
     {
         username: 'mira',
         name: 'Mira Chen',
@@ -77,12 +95,34 @@ const CREATORS = [
             { title: 'Why nanopayments finally make sense', price: 0.001 },
         ],
     },
+    {
+        username: 'noor_music',
+        name: 'Noor Rahman',
+        bio: 'Ambient + field recordings from Istanbul rooftops. Monthly mixtape.',
+        cat: 'Music',
+        posts: [
+            { title: 'Mixtape #14: 47 minutes of sampled tram sounds', price: 0.005 },
+            { title: 'Stems pack — three unfinished tracks', price: 0.003 },
+        ],
+    },
+    {
+        username: 'dev_dario',
+        name: 'Dario Ruiz',
+        bio: 'Low-level performance rabbit holes. Rust, SIMD, cache lines.',
+        cat: 'Engineering',
+        posts: [
+            { title: 'Beat memcpy with 14 lines of AVX-512', price: 0.005 },
+            { title: 'Cache-oblivious sort in 60 lines of Rust', price: 0.003 },
+        ],
+    },
 ];
 
 (async () => {
     console.log('Seeding demo creators…\n');
     for (const c of CREATORS) {
-        const addr = demoWallet(c.username).toLowerCase();
+        // Use explicit address when provided (test wallets where USDC
+        // actually lands on unlock), else derive deterministically.
+        const addr = (c.address ? c.address : demoWallet(c.username)).toLowerCase();
 
         // Upsert creator
         const existing = await pool.query('SELECT address FROM creators WHERE LOWER(address) = $1', [addr]);

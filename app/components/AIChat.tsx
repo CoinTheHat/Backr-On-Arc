@@ -395,38 +395,20 @@ export default function AIChat() {
                     throw new Error('Could not resolve post creator address. Ask me to look up the post by title or open the creator profile.');
                 }
 
-                const price = parseFloat(String(amount));
-
-                // Prefer Gateway balance for silent unlock — no MetaMask
-                let usedGateway = false;
-                if (gatewayBalance && parseFloat(gatewayBalance) >= price) {
-                    const ref = `gateway:${address}:${Date.now()}`;
-                    const res = await fetch(`/api/posts/${postId}/purchase`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ buyerAddress: address, txHash: ref, method: 'gateway' }),
-                    });
-                    if (res.ok) {
-                        usedGateway = true;
-                        updateStatus({ status: 'done', message: `Post unlocked for $${amount} — debited from Gateway balance (no gas)` });
-                    }
-                }
-
-                if (!usedGateway) {
-                    // Fallback: direct USDC transfer
-                    const txHash = await activeWc.writeContract({
-                        address: TOKENS.USDC as Address,
-                        abi: TIP20_ABI,
-                        functionName: 'transfer',
-                        args: [toAddress as Address, parseUnits(String(amount), 6)],
-                    });
-                    await fetch(`/api/posts/${postId}/purchase`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ buyerAddress: address, txHash }),
-                    });
-                    updateStatus({ status: 'done', txHash, message: `Post unlocked for $${amount}` });
-                }
+                // Always unlock on-chain — we want a verifiable ArcScan tx,
+                // not a silent DB insert that reads as "nothing happened."
+                const txHash = await activeWc.writeContract({
+                    address: TOKENS.USDC as Address,
+                    abi: TIP20_ABI,
+                    functionName: 'transfer',
+                    args: [toAddress as Address, parseUnits(String(amount), 6)],
+                });
+                await fetch(`/api/posts/${postId}/purchase`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ buyerAddress: address, txHash }),
+                });
+                updateStatus({ status: 'done', txHash, message: `Post unlocked for $${amount}` });
             }
 
             else if (action.type === 'request_commission') {

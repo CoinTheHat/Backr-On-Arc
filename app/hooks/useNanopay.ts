@@ -520,7 +520,15 @@ export function useNanopay(): NanopayState & NanopayActions {
         });
 
         if (!retryRes.ok) {
-          throw new Error(`Payment accepted but resource returned ${retryRes.status}`);
+          // Pull the JSON body so the UI sees the real facilitator reason
+          // (e.g. "amount_mismatch", "invalid_signature", "insufficient_balance",
+          // "nonce_already_used", "authorization_validity_too_short").
+          let detail = '';
+          try {
+            const errBody = await retryRes.json();
+            detail = errBody?.detail || errBody?.error || JSON.stringify(errBody).slice(0, 200);
+          } catch {}
+          throw new Error(`Facilitator rejected (${retryRes.status}): ${detail || 'no detail'}`);
         }
 
         const data = (await retryRes.json()) as T;

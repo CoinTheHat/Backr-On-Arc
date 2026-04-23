@@ -119,13 +119,26 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'malformed PAYMENT-SIGNATURE header' }, { status: 402 });
     }
 
+    // Call verify() first for diagnostics — it surfaces an invalidReason we
+    // can log before settle() silently returns success:false.
+    console.log('[x402/nanobatch] payload keys:', Object.keys(payload || {}));
+    console.log('[x402/nanobatch] payload.payload keys:', Object.keys(payload?.payload || {}));
+    console.log('[x402/nanobatch] requirements:', JSON.stringify(requirements));
+    try {
+        const verifyRes = await facilitator.verify(payload, requirements as any);
+        console.log('[x402/nanobatch] verify:', verifyRes);
+    } catch (e: any) {
+        console.error('[x402/nanobatch] verify threw:', e?.message || e);
+    }
+
     let settlement: any;
     try {
         settlement = await facilitator.settle(payload, requirements as any);
+        console.log('[x402/nanobatch] settle:', settlement);
     } catch (e: any) {
-        console.error('[x402/nanobatch] facilitator.settle threw:', e);
+        console.error('[x402/nanobatch] facilitator.settle threw:', e?.message || e, e?.stack?.slice(0, 500));
         return NextResponse.json(
-            { error: 'settlement failed', detail: e.message?.slice(0, 200) },
+            { error: 'settlement failed', detail: e.message?.slice(0, 300) },
             { status: 402 },
         );
     }
@@ -133,7 +146,11 @@ export async function POST(req: Request) {
     if (!settlement?.success) {
         console.warn('[x402/nanobatch] settlement rejected:', settlement);
         return NextResponse.json(
-            { error: 'Settlement rejected', detail: settlement?.errorReason || 'unknown' },
+            {
+                error: 'Settlement rejected',
+                detail: settlement?.errorReason || 'unknown',
+                raw: settlement,
+            },
             { status: 402 },
         );
     }

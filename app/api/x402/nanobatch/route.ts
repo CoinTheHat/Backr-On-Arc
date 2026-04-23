@@ -107,7 +107,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'invalid JSON body' }, { status: 400 });
     }
 
-    const items: Array<{ receiver: string; amount: string; label?: string }> = Array.isArray(body?.items) ? body.items : [];
+    const items: Array<{ id?: string; receiver: string; amount: string; label?: string }> = Array.isArray(body?.items) ? body.items : [];
     const sender: string | undefined = body?.sender;
     if (items.length === 0 || !sender) {
         return NextResponse.json({ error: 'items[] and sender required' }, { status: 400 });
@@ -232,33 +232,50 @@ export async function POST(req: Request) {
         );
     }
 
-    let onchainHash: Hex;
-    try {
-        const account = privateKeyToAccount(feePayerKey as Hex);
-        const wc = createWalletClient({
-            account,
-            chain: ARC_TESTNET as any,
-            transport: http('https://rpc.testnet.arc.network'),
-        });
-        const pc = createPublicClient({
-            chain: ARC_TESTNET as any,
-            transport: http('https://rpc.testnet.arc.network'),
-        });
-        onchainHash = await wc.writeContract({
-            account,
-            chain: ARC_TESTNET as any,
-            address: usdc,
-            abi: USDC_TRANSFER_ABI,
-            functionName: 'transfer',
-            args: [payTo as Address, totalAtomic],
-        });
-        console.log('[x402/nanobatch] on-chain batch settlement submitted:', onchainHash);
-        // Background-confirm; don't block the response.
-        pc.waitForTransactionReceipt({ hash: onchainHash, timeout: 5000 }).catch(() => {});
-    } catch (e: any) {
-        console.error('[x402/nanobatch] on-chain settlement failed:', e?.message || e);
+    // Fire one real USDC.transfer per nanopayment, each to its specific
+    // receiver address. Every settlement row gets its own on-chain hash so
+    // the demo UI can show a real ArcScan entry per step.
+    const account = privateKeyToAccount(feePayerKey as Hex);
+    const wc = createWalletClient({
+        account,
+        chain: ARC_TESTNET as any,
+        transport: http('https://rpc.testnet.arc.network'),
+    });
+    const pc = createPublicClient({
+        chain: ARC_TESTNET as any,
+        transport: http('https://rpc.testnet.arc.network'),
+    });
+
+    const perItemTxs: Array<{ id: string; receiver: string; amount: string; txHash: Hex }> = [];
+    const perItemErrors: Array<{ id: string; receiver: string; error: string }> = [];
+
+    for (const item of items) {
+        const itemId: string = item.id || `item-${perItemTxs.length}`;
+        const itemReceiver: Address = ((item.receiver || payTo) as Address).toLowerCase() as Address;
+        const itemAmount: bigint = parseUnits(String(item.amount || '0'), 6);
+        if (itemAmount <= BigInt(0)) continue;
+        try {
+            const hash = await wc.writeContract({
+                account,
+                chain: ARC_TESTNET as any,
+                address: usdc,
+                abi: USDC_TRANSFER_ABI,
+                functionName: 'transfer',
+                args: [itemReceiver, itemAmount],
+            });
+            perItemTxs.push({ id: itemId, receiver: itemReceiver, amount: String(item.amount), txHash: hash });
+            pc.waitForTransactionReceipt({ hash, timeout: 5000 }).catch(() => {});
+            console.log(`[x402/nanobatch] tx for ${itemId} -> ${itemReceiver} $${item.amount}: ${hash}`);
+        } catch (e: any) {
+            const msg = e?.message?.slice(0, 200) || 'writeContract threw';
+            perItemErrors.push({ id: itemId, receiver: itemReceiver, error: msg });
+            console.error(`[x402/nanobatch] tx failed for ${itemId}:`, msg);
+        }
+    }
+
+    if (perItemTxs.length === 0) {
         return NextResponse.json(
-            { error: 'On-chain settlement failed', detail: e?.message?.slice(0, 250) || 'writeContract threw' },
+            { error: 'On-chain settlement failed', detail: perItemErrors[0]?.error || 'no tx succeeded' },
             { status: 500 },
         );
     }
@@ -267,13 +284,18 @@ export async function POST(req: Request) {
         success: true,
         payer: sender,
         network: 'eip155:5042002',
-        transaction: onchainHash,
+        // The first tx stands in as the "primary" settlement reference; the
+        // per-item hashes are surfaced in the response body.
+        transaction: perItemTxs[0].txHash,
+        itemTxs: perItemTxs,
+        itemErrors: perItemErrors,
     };
 
     // ---------- Step C: record sub-items in our off-chain ledger ----------
-    const settleRef = settlement.transaction || `batch:${Date.now()}`;
     const recorded: any[] = [];
     for (const item of items) {
+        const itemTx = perItemTxs.find(t => t.id === (item.id || ''));
+        const txRef = itemTx?.txHash || settlement.transaction || `batch:${Date.now()}`;
         try {
             const row = await db.tips.create({
                 sender: sender.toLowerCase(),
@@ -281,7 +303,7 @@ export async function POST(req: Request) {
                 amount: parseFloat(String(item.amount)) || 0,
                 currency: 'USDC',
                 message: item.label || 'x402 nano-payment',
-                txHash: settleRef,
+                txHash: txRef,
             });
             recorded.push(row);
         } catch (e) {
@@ -309,6 +331,8 @@ export async function POST(req: Request) {
                 transaction: settlement.transaction,
                 payer: settlement.payer,
                 network: settlement.network,
+                itemTxs: perItemTxs,
+                itemErrors: perItemErrors,
             },
             recorded: recorded.length,
             items: recorded,

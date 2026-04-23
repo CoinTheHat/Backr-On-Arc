@@ -10,7 +10,13 @@ import { ARC_EXPLORER_URL, PLATFORM_TREASURY } from '@/app/utils/constants';
 interface X402Settlement {
     success: boolean;
     totalPaid?: string;
-    settlement?: { transaction?: string; payer?: string; network?: string };
+    settlement?: {
+        transaction?: string;
+        payer?: string;
+        network?: string;
+        itemTxs?: Array<{ id: string; receiver: string; amount: string; txHash: string }>;
+        itemErrors?: Array<{ id: string; receiver: string; error: string }>;
+    };
     recorded?: number;
 }
 
@@ -223,14 +229,16 @@ export default function DemoPage() {
             console.error('[demo] x402 error', e);
         }
 
+        const isOnChainHash = (h?: string) => typeof h === 'string' && /^0x[a-fA-F0-9]{64}$/.test(h);
         const rawSettlementTx = x402Result?.settlement?.transaction;
-        // Only treat it as a real on-chain tx hash if it actually looks like one
-        // (0x-prefixed 32-byte hex). Our fallback emits local-verify:<hex> and
-        // Circle sometimes returns UUIDs that ArcScan can't resolve. Don't
-        // present those as on-chain txs.
-        const isOnChainHash = typeof rawSettlementTx === 'string' && /^0x[a-fA-F0-9]{64}$/.test(rawSettlementTx);
-        const settlementTx = isOnChainHash ? rawSettlementTx : undefined;
-        const batchRef = rawSettlementTx || `batch:${Date.now()}`;
+        const itemTxs = x402Result?.settlement?.itemTxs || [];
+        // Build id -> real on-chain hash map from per-item txs.
+        const txByItemId = new Map<string, string>();
+        for (const t of itemTxs) {
+            if (isOnChainHash(t.txHash)) txByItemId.set(t.id, t.txHash);
+        }
+        const firstValidHash = itemTxs.find(t => isOnChainHash(t.txHash))?.txHash;
+        const batchRef = rawSettlementTx || firstValidHash || `batch:${Date.now()}`;
 
         // Animate each nano-step completion with settlement details
         for (const it of NANO_ITEMS) {
@@ -251,11 +259,29 @@ export default function DemoPage() {
                 batchRef,
                 timestamp: Date.now(),
             };
+            // Pick the real on-chain hash for this step. For the batch row
+            // we take the first of the 10 tx hashes as the card's primary.
+            const stepHash = it.id === 'batch'
+                ? (txByItemId.get('batch-0') || itemTxs.find(t => t.id?.startsWith('batch-'))?.txHash)
+                : txByItemId.get(it.id);
+            const validStepHash = isOnChainHash(stepHash) ? stepHash : undefined;
+
             if (it.id === 'batch') {
-                updateStep(it.id, { status: 'done', result: `10/10 nano-tips split across ${pool.length} creators ($0.01 total)`, settlement, txHash: settlementTx });
+                const count = itemTxs.filter(t => t.id?.startsWith('batch-') && isOnChainHash(t.txHash)).length;
+                updateStep(it.id, {
+                    status: 'done',
+                    result: `${count}/10 nano-tips settled on-chain across ${pool.length} creators ($0.01 total)`,
+                    settlement,
+                    txHash: validStepHash,
+                });
             } else {
                 const name = itemForStep?.receiverName ?? `${settlement.to.slice(0, 8)}…`;
-                updateStep(it.id, { status: 'done', result: `Debited $${it.amount} → ${name}`, settlement, txHash: settlementTx });
+                updateStep(it.id, {
+                    status: 'done',
+                    result: `Sent $${it.amount} to ${name}${validStepHash ? '' : ' (settlement pending)'}`,
+                    settlement,
+                    txHash: validStepHash,
+                });
             }
             refreshTxCount();
         }

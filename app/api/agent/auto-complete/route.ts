@@ -46,7 +46,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Agent wallet not configured (FEE_PAYER_PRIVATE_KEY missing)' }, { status: 500 });
         }
 
-        // Find an open job
+        // Find an open job; if none exist (demo scenario on a freshly reset
+        // platform), synthesize one so the AI agent always has something to
+        // complete. This keeps the demo step meaningful whether or not real
+        // supporters have requested commissions yet.
         let job;
         if (jobId) {
             job = await db.jobs.getById(jobId);
@@ -54,9 +57,26 @@ export async function POST(request: Request) {
         } else {
             const openJobs = await db.jobs.getAll('open');
             if (openJobs.length === 0) {
-                return NextResponse.json({ error: 'No open jobs available', agentAddress: agentAccount.address }, { status: 404 });
+                const demoTitles = [
+                    'Write a 200-word intro to ZK rollups',
+                    'Summarize the Arc Network architecture',
+                    'Draft release notes for v0.3',
+                    'Explain x402 nanopayments to a non-crypto audience',
+                ];
+                const pick = demoTitles[Math.floor(Math.random() * demoTitles.length)];
+                job = await db.jobs.create({
+                    onchainId: null,
+                    creatorAddress: agentAccount.address,
+                    requesterAddress: body.requester || agentAccount.address,
+                    title: pick,
+                    description: 'Demo commission auto-spawned because the platform had no open jobs. AI agent will draft and submit a deliverable against this record.',
+                    budget: 1,
+                    txHash: null,
+                });
+                console.log('[auto-complete] spawned demo commission:', job.id);
+            } else {
+                job = openJobs[0];
             }
-            job = openJobs[0]; // Take the first open job
         }
 
         const steps: string[] = [];

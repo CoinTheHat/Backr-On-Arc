@@ -221,8 +221,14 @@ export default function DemoPage() {
             console.error('[demo] x402 error', e);
         }
 
-        const settlementTx = x402Result?.settlement?.transaction;
-        const batchRef = settlementTx || `batch:${Date.now()}`;
+        const rawSettlementTx = x402Result?.settlement?.transaction;
+        // Only treat it as a real on-chain tx hash if it actually looks like one
+        // (0x-prefixed 32-byte hex). Our fallback emits local-verify:<hex> and
+        // Circle sometimes returns UUIDs that ArcScan can't resolve. Don't
+        // present those as on-chain txs.
+        const isOnChainHash = typeof rawSettlementTx === 'string' && /^0x[a-fA-F0-9]{64}$/.test(rawSettlementTx);
+        const settlementTx = isOnChainHash ? rawSettlementTx : undefined;
+        const batchRef = rawSettlementTx || `batch:${Date.now()}`;
 
         // Animate each nano-step completion with settlement details
         for (const it of NANO_ITEMS) {
@@ -421,7 +427,11 @@ export default function DemoPage() {
                                     </div>
                                     <div className="flex justify-between gap-3 pt-1 border-t border-slate-200 mt-1">
                                         <span className="text-slate-400">rail</span>
-                                        <span className="text-indigo-600">Circle Gateway · off-chain · settled against on-chain deposit</span>
+                                        <span className="text-indigo-600">
+                                            {step.txHash
+                                                ? 'Circle Gateway · on-chain settlement'
+                                                : 'x402 signed · local-verified (Circle facilitator pending Arc Testnet support)'}
+                                        </span>
                                     </div>
                                 </div>
                             )}

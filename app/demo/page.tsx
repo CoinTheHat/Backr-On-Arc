@@ -6,6 +6,14 @@ import { Rocket, Play, CheckCircle, Loader2, Zap, DollarSign, Bot, FileText, Arr
 import { useNanopay } from '@/app/hooks/useNanopay';
 import { ARC_EXPLORER_URL, PLATFORM_TREASURY } from '@/app/utils/constants';
 
+/** Shape of the successful /api/x402/nanobatch response. */
+interface X402Settlement {
+    success: boolean;
+    totalPaid?: string;
+    settlement?: { transaction?: string; payer?: string; network?: string };
+    recorded?: number;
+}
+
 interface SettlementDetail {
     from: string;
     to: string;
@@ -38,7 +46,7 @@ const NANO_ITEMS: Array<{ id: string; label: string; description: string; amount
 
 export default function DemoPage() {
     const { address, isConnected } = useAccount();
-    const { balance, deposit, getBalance } = useNanopay();
+    const { balance, deposit, getBalance, payForContent } = useNanopay();
     const [txCount, setTxCount] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
 
@@ -187,29 +195,45 @@ export default function DemoPage() {
             }
         });
 
-        const batchRef = `gateway:${address}:${Date.now()}`;
-        let recordedCount = 0;
+        // ============ REAL x402 CALL ============
+        // POST to our x402-gated endpoint. payForContent handles the full
+        // flow: first request gets HTTP 402, EIP-712 batch signature is
+        // constructed by @circle-fin/x402-batching BatchEvmScheme, request
+        // retries with PAYMENT-SIGNATURE header, backend calls Circle's
+        // BatchFacilitatorClient.settle() and returns the settlement
+        // envelope. One MetaMask signature prompt for the whole batch; zero
+        // gas; recorded against the user's Gateway deposit on-chain.
+        let x402Result: X402Settlement | null = null;
+        let x402Error: string | null = null;
         try {
-            const recRes = await fetch('/api/demo/record-batch', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sender: address, items: flatItems, signature: batchRef }),
-                cache: 'no-store',
-            });
-            const recData = await recRes.json().catch(() => ({}));
-            recordedCount = recData?.recorded ?? flatItems.length;
-            console.log('[demo] recorded nanopayments:', recordedCount);
-        } catch (e) {
-            console.error('[demo] record-batch failed:', e);
+            const { data, amount: paidAmount } = await payForContent<X402Settlement>(
+                '/api/x402/nanobatch',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: { sender: address, items: flatItems },
+                },
+            );
+            x402Result = data;
+            console.log('[demo] x402 settlement', { paidAmount, data });
+        } catch (e: any) {
+            x402Error = e?.message?.slice(0, 200) || 'x402 payment failed';
+            console.error('[demo] x402 error', e);
         }
+
+        const settlementTx = x402Result?.settlement?.transaction;
+        const batchRef = settlementTx || `batch:${Date.now()}`;
 
         // Animate each nano-step completion with settlement details
         for (const it of NANO_ITEMS) {
             updateStep(it.id, { status: 'running' });
             await new Promise(r => setTimeout(r, 300));
-            // Pull the recipient for this step from flatItems (first entry for
-            // non-batch, or the first of 10 for the batch step so the card
-            // shows a concrete recipient rather than treasury).
+
+            if (x402Error) {
+                updateStep(it.id, { status: 'error', result: `x402 settlement failed: ${x402Error.slice(0, 80)}` });
+                continue;
+            }
+
             const itemForStep = flatItems.find(f => f.id === it.id || f.id === `batch-0`);
             const settlement: SettlementDetail = {
                 from: address as string,
@@ -220,10 +244,10 @@ export default function DemoPage() {
                 timestamp: Date.now(),
             };
             if (it.id === 'batch') {
-                updateStep(it.id, { status: 'done', result: `10/10 nano-tips split across ${pool.length} creators ($0.01 total)`, settlement });
+                updateStep(it.id, { status: 'done', result: `10/10 nano-tips split across ${pool.length} creators ($0.01 total)`, settlement, txHash: settlementTx });
             } else {
                 const name = itemForStep?.receiverName ?? `${settlement.to.slice(0, 8)}…`;
-                updateStep(it.id, { status: 'done', result: `Debited $${it.amount} → ${name}`, settlement });
+                updateStep(it.id, { status: 'done', result: `Debited $${it.amount} → ${name}`, settlement, txHash: settlementTx });
             }
             refreshTxCount();
         }

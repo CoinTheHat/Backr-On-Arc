@@ -31,15 +31,18 @@ export const dynamic = 'force-dynamic';
 // Load Circle's Arc config + facilitator client lazily so Next build doesn't
 // choke if the packages aren't resolvable at build-time.
 async function getFacilitator() {
-    const [{ BatchFacilitatorClient }, clientMod] = await Promise.all([
+    const [{ BatchFacilitatorClient }, clientMod, coreServer] = await Promise.all([
         import('@circle-fin/x402-batching/server'),
         import('@circle-fin/x402-batching/client'),
+        import('@x402/core/server'),
     ]);
     const arc = (clientMod as any).CHAIN_CONFIGS.arcTestnet;
     return {
         facilitator: new BatchFacilitatorClient(),
         usdc: arc.usdc as `0x${string}`,
         gatewayWallet: arc.gatewayWallet as `0x${string}`,
+        encodePaymentRequiredHeader: (coreServer as any).encodePaymentRequiredHeader as (req: unknown) => string,
+        encodePaymentResponseHeader: (coreServer as any).encodePaymentResponseHeader as (res: unknown) => string,
     };
 }
 
@@ -79,20 +82,26 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'total amount must be > 0' }, { status: 400 });
     }
 
-    const { facilitator, usdc, gatewayWallet } = await getFacilitator();
+    const { facilitator, usdc, gatewayWallet, encodePaymentRequiredHeader, encodePaymentResponseHeader } = await getFacilitator();
     const payTo: string = body?.payTo || PLATFORM_TREASURY;
     const requirements = buildRequirements(totalAtomic, usdc, gatewayWallet, payTo);
+    const paymentRequired = { x402Version: 2, accepts: [requirements] };
 
     // ---------- Step A: no signature header → return 402 ----------
     const signatureHeader = req.headers.get('PAYMENT-SIGNATURE') || req.headers.get('payment-signature') || req.headers.get('X-PAYMENT');
     if (!signatureHeader) {
+        // x402 v2 carries the requirements in a base64 PAYMENT-REQUIRED HEADER,
+        // not the JSON body. Clients (x402HTTPClient.getPaymentRequiredResponse)
+        // look for the header first; without it they throw
+        // "Invalid payment required response".
         return NextResponse.json(
+            { error: 'Payment required', ...paymentRequired },
             {
-                x402Version: 2,
-                accepts: [requirements],
-                error: 'Payment required',
+                status: 402,
+                headers: {
+                    'PAYMENT-REQUIRED': encodePaymentRequiredHeader(paymentRequired),
+                },
             },
-            { status: 402 },
         );
     }
 
@@ -142,17 +151,16 @@ export async function POST(req: Request) {
         }
     }
 
-    // x402 spec says seller may include a PAYMENT-RESPONSE header for
-    // confirmation; mirror the settlement envelope there.
+    // x402 spec requires PAYMENT-RESPONSE header as base64(JSON) — use the
+    // library's encoder so the client's x402HTTPClient.getPaymentSettleResponse
+    // can decode it cleanly.
     const responseHeaders = new Headers({
-        'PAYMENT-RESPONSE': Buffer.from(
-            JSON.stringify({
-                success: true,
-                payer: settlement.payer,
-                transaction: settlement.transaction,
-                network: settlement.network,
-            }),
-        ).toString('base64'),
+        'PAYMENT-RESPONSE': encodePaymentResponseHeader({
+            success: true,
+            payer: settlement.payer,
+            transaction: settlement.transaction,
+            network: settlement.network,
+        }),
     });
 
     return NextResponse.json(

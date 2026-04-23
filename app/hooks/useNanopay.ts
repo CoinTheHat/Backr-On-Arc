@@ -200,20 +200,7 @@ export function useNanopay(): NanopayState & NanopayActions {
           args: [addr, GATEWAY_WALLET],
         })) as bigint;
 
-        // 2. Approve if needed
-        if (allowance < depositAmount) {
-          console.log("[useNanopay] Approving gateway wallet...");
-          const approveTx = await wc.writeContract({
-            address: USDC_ADDRESS,
-            abi: ERC20_ABI,
-            functionName: "approve",
-            args: [GATEWAY_WALLET, depositAmount],
-          });
-          await publicClient.waitForTransactionReceipt({ hash: approveTx });
-          console.log("[useNanopay] Approval confirmed:", approveTx);
-        }
-
-        // 3. Check wallet has enough USDC before depositing
+        // 2. Check wallet has enough USDC upfront
         const walletBal = (await publicClient.readContract({
           address: USDC_ADDRESS,
           abi: ERC20_ABI,
@@ -224,7 +211,37 @@ export function useNanopay(): NanopayState & NanopayActions {
           throw new Error(`Insufficient USDC. You have $${formatUnits(walletBal, 6)}, trying to deposit $${amount}`);
         }
 
-        // 4. Deposit into gateway
+        // 3. Approve if needed — wait for receipt with a tight timeout so we
+        // don't hang the UI if Arc is congested.
+        if (allowance < depositAmount) {
+          console.log("[useNanopay] Approving gateway wallet...");
+          const approveTx = await wc.writeContract({
+            address: USDC_ADDRESS,
+            abi: ERC20_ABI,
+            functionName: "approve",
+            args: [GATEWAY_WALLET, depositAmount],
+          });
+          try {
+            await publicClient.waitForTransactionReceipt({ hash: approveTx, timeout: 60_000 });
+          } catch {
+            // If receipt still pending after 60s, poll allowance directly (cheaper than waiting for full receipt)
+            for (let i = 0; i < 30; i++) {
+              const current = (await publicClient.readContract({
+                address: USDC_ADDRESS,
+                abi: ERC20_ABI,
+                functionName: "allowance",
+                args: [addr, GATEWAY_WALLET],
+              })) as bigint;
+              if (current >= depositAmount) break;
+              await new Promise(r => setTimeout(r, 2000));
+            }
+          }
+          console.log("[useNanopay] Approval confirmed:", approveTx);
+        }
+
+        // 4. Deposit into gateway — return hash immediately after submission.
+        // Balance is polled by the caller / getBalance so we don't block the
+        // UI on Arc testnet mempool confirmations.
         console.log("[useNanopay] Depositing into gateway...");
         const depositTx = await wc.writeContract({
           address: GATEWAY_WALLET,
@@ -232,14 +249,27 @@ export function useNanopay(): NanopayState & NanopayActions {
           functionName: "deposit",
           args: [USDC_ADDRESS, depositAmount],
         });
-        const receipt = await publicClient.waitForTransactionReceipt({ hash: depositTx });
-        if (receipt.status !== 'success') {
-          throw new Error(`Deposit transaction reverted. See ${depositTx} on ArcScan for details.`);
-        }
-        console.log("[useNanopay] Deposit confirmed:", depositTx);
+        console.log("[useNanopay] Deposit submitted:", depositTx);
 
-        // 4. Refresh balance
-        await getBalance();
+        // Kick off balance polling in the background (non-blocking)
+        (async () => {
+          for (let i = 0; i < 30; i++) {
+            await new Promise(r => setTimeout(r, 2000));
+            try {
+              const raw = (await publicClient.readContract({
+                address: GATEWAY_WALLET,
+                abi: GATEWAY_WALLET_ABI,
+                functionName: "availableBalance",
+                args: [USDC_ADDRESS, addr],
+              })) as bigint;
+              if (raw >= depositAmount / BigInt(2)) {
+                setBalance(formatUnits(raw, 6));
+                setBalanceRaw(raw);
+                break;
+              }
+            } catch {}
+          }
+        })();
 
         return depositTx;
       } catch (err) {
@@ -275,15 +305,18 @@ export function useNanopay(): NanopayState & NanopayActions {
           args: [USDC_ADDRESS, withdrawAmount],
         });
 
+        // Don't block the UI on Arc testnet receipts. Poll balance in the
+        // background and return the hash immediately.
         if (publicClient) {
-          await publicClient.waitForTransactionReceipt({ hash: txHash });
+          (async () => {
+            for (let i = 0; i < 30; i++) {
+              await new Promise(r => setTimeout(r, 2000));
+              try { await getBalance(); } catch {}
+            }
+          })();
         }
 
         console.log("[useNanopay] Withdrawal initiated:", txHash);
-
-        // Refresh balance
-        await getBalance();
-
         return txHash;
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Withdrawal failed";

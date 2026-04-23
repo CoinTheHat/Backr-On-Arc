@@ -21,9 +21,10 @@ export async function GET() {
             subscriptions: memberships?.length || 0,
             jobs: jobs?.length || 0,
             totalTxns,
+            total: totalTxns, // alias for compatibility
         });
     } catch (error: any) {
         console.error('Global stats error:', error);
-        return NextResponse.json({ totalTxns: 0 }, { status: 200 });
+        return NextResponse.json({ totalTxns: 0, total: 0 }, { status: 200 });
     }
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import RevenueChart from '../components/RevenueChart';
+import CreatorEarnings from '../components/CreatorEarnings';
 import { useRouter } from 'next/navigation';
 import { formatPrice } from '@/utils/format';
 import {
@@ -260,6 +261,11 @@ export default function StudioOverview() {
             <section>
                 <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome, Creator.</h1>
                 <p className="text-slate-500">Here is what's happening with your studio today.</p>
+            </section>
+
+            {/* EARNINGS */}
+            <section>
+                <CreatorEarnings />
             </section>
 
             {/* PLATFORM FEATURES SHOWCASE */}

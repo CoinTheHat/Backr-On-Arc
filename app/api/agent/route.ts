@@ -90,10 +90,13 @@ export async function POST(request: Request) {
             let creatorsInfo = '';
             let statsInfo = '';
             let jobsInfo = '';
+            let ppvPostsInfo = '';
             try {
                 const creators = await db.creators.getAll();
                 if (creators.length > 0) {
-                    // Fetch tiers for each creator to include in context
+                    // Fetch tiers for each creator to include in context — use
+                    // the creator's ACTUAL wallet address so the AI can emit
+                    // valid on-chain actions without hallucinating.
                     const creatorLines = await Promise.all(creators.map(async (c: any) => {
                         let tiersTxt = '';
                         try {
@@ -102,10 +105,27 @@ export async function POST(request: Request) {
                                 tiersTxt = ` | Tiers: ${tiers.map((t: any) => `${t.name}($${t.price})`).join(', ')}`;
                             }
                         } catch {}
-                        return `- ${c.name || 'Unnamed'} (@${c.username || 'no-username'}) — ${c.bio || 'No bio'}${tiersTxt}`;
+                        return `- ${c.name || 'Unnamed'} (@${c.username || 'no-username'}) [address=${c.address}]${tiersTxt}`;
                     }));
-                    creatorsInfo = '\n\nACTIVE CREATORS ON THE PLATFORM:\n' + creatorLines.join('\n');
+                    creatorsInfo = '\n\nACTIVE CREATORS ON THE PLATFORM (use the exact [address=0x...] when emitting on-chain actions — NEVER invent addresses):\n' + creatorLines.join('\n');
                 }
+
+                // PPV-enabled posts so the AI can emit valid unlock_ppv actions
+                try {
+                    const allPosts = await db.posts.getAll();
+                    const ppv = (allPosts || []).filter((p: any) => p?.ppvEnabled || p?.ppvPrice);
+                    if (ppv.length > 0) {
+                        const lines = ppv.slice(0, 15).map((p: any) => {
+                            const creator = creators.find((c: any) => (c.address || '').toLowerCase() === (p.creatorAddress || '').toLowerCase());
+                            const handle = creator ? `@${creator.username || creator.name}` : (p.creatorAddress || '').slice(0, 8);
+                            return `- postId=${p.id} | title="${(p.title || 'Untitled').slice(0, 40)}" | creator=${handle} | creatorAddress=${p.creatorAddress} | price=$${p.ppvPrice || '0.005'}`;
+                        });
+                        ppvPostsInfo = '\n\nPAY-PER-VIEW POSTS (use postId + creatorAddress exactly as given for unlock_ppv):\n' + lines.join('\n');
+                    }
+                } catch (e) {
+                    console.warn('Could not fetch posts for chat:', e);
+                }
+
                 const stats = await db.stats.getCounts();
                 statsInfo = `\n\nPLATFORM STATS: ${stats.creators} creators, ${stats.posts} posts, ${stats.tips} tips, $${stats.volume.toFixed(2)} total volume`;
 
@@ -165,6 +185,8 @@ CRITICAL EXECUTE RULES:
 - English triggers: "create tier", "make a post", "subscribe to", "withdraw earnings", "deposit", "request content from", "commission from"
 - For request_commission: look up the creator name/username from ACTIVE CREATORS list, resolve to creatorAddress
 - Don't invent addresses — use creator context data for lookups
+- For unlock_ppv: ONLY emit it if you can find both the exact postId AND creatorAddress in the PAY-PER-VIEW POSTS list above. If the user asks to unlock a post you can't find in that list, say "I can't find that post — check /feed or the creator's profile" and suggest [ACTION:Creator Profile|/<username>] instead. NEVER emit unlock_ppv with placeholder values like "0x...", "abc", or anything not in the context.
+- For subscribe_tier and send_tip: only use addresses from the ACTIVE CREATORS list's [address=0x...] suffix. If a username isn't in the list, say so and suggest [ACTION:Explore Creators|/explore].
 - If user doesn't specify a price, ask once. If they say "cheap" or "standard", use sensible defaults ($5 tier, $5 gateway deposit)
 - ALWAYS confirm what you did AFTER executing, don't ask before
 - Execute actions happen automatically with user's wallet — the user approves in MetaMask
@@ -186,7 +208,7 @@ NAVIGATION:
 - Gas comparison: [ACTION:Why Nanopayments?|/about/gas-comparison]
 - Connect wallet: [ACTION:Connect Wallet|/login]
 - Become a creator: [ACTION:Become Creator|/onboarding]
-${creatorsInfo}${statsInfo}${jobsInfo}
+${creatorsInfo}${ppvPostsInfo}${statsInfo}${jobsInfo}
 
 FEATURES TO EXPLAIN:
 - Pay-Per-View: Creators can set per-post pricing ($0.001-$0.01 USDC). Supporters pay per view with gasless nanopayments.

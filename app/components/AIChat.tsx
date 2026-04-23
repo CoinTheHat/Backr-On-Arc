@@ -62,7 +62,7 @@ export default function AIChat() {
     const { address, isConnected } = useAccount();
     const { data: walletClient, refetch: refetchWalletClient } = useWalletClient();
     const { contractAddress } = useCommunity();
-    const { deposit: depositToGateway, withdraw: withdrawFromGateway } = useNanopay();
+    const { deposit: depositToGateway, withdraw: withdrawFromGateway, balance: gatewayBalance } = useNanopay();
 
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
@@ -386,29 +386,47 @@ export default function AIChat() {
 
                 // Resolve creator address if not provided
                 let toAddress = postCreatorAddr;
-                if (!toAddress) {
+                if (!toAddress || typeof toAddress !== 'string' || !/^0x[a-fA-F0-9]{40}$/.test(toAddress)) {
                     const postRes = await fetch(`/api/posts/${postId}`);
                     const postData = await postRes.json();
                     toAddress = postData?.creatorAddress;
                 }
-                if (!toAddress) throw new Error('Could not find post creator');
+                if (!toAddress || !/^0x[a-fA-F0-9]{40}$/.test(toAddress)) {
+                    throw new Error('Could not resolve post creator address. Ask me to look up the post by title or open the creator profile.');
+                }
 
-                // Send USDC directly (useSend equivalent)
-                const txHash = await activeWc.writeContract({
-                    address: TOKENS.USDC as Address,
-                    abi: TIP20_ABI,
-                    functionName: 'transfer',
-                    args: [toAddress as Address, parseUnits(String(amount), 6)],
-                });
+                const price = parseFloat(String(amount));
 
-                // Record purchase
-                await fetch(`/api/posts/${postId}/purchase`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ buyerAddress: address, txHash }),
-                });
+                // Prefer Gateway balance for silent unlock — no MetaMask
+                let usedGateway = false;
+                if (gatewayBalance && parseFloat(gatewayBalance) >= price) {
+                    const ref = `gateway:${address}:${Date.now()}`;
+                    const res = await fetch(`/api/posts/${postId}/purchase`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ buyerAddress: address, txHash: ref, method: 'gateway' }),
+                    });
+                    if (res.ok) {
+                        usedGateway = true;
+                        updateStatus({ status: 'done', message: `Post unlocked for $${amount} — debited from Gateway balance (no gas)` });
+                    }
+                }
 
-                updateStatus({ status: 'done', txHash, message: `Post unlocked for $${amount}` });
+                if (!usedGateway) {
+                    // Fallback: direct USDC transfer
+                    const txHash = await activeWc.writeContract({
+                        address: TOKENS.USDC as Address,
+                        abi: TIP20_ABI,
+                        functionName: 'transfer',
+                        args: [toAddress as Address, parseUnits(String(amount), 6)],
+                    });
+                    await fetch(`/api/posts/${postId}/purchase`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ buyerAddress: address, txHash }),
+                    });
+                    updateStatus({ status: 'done', txHash, message: `Post unlocked for $${amount}` });
+                }
             }
 
             else if (action.type === 'request_commission') {

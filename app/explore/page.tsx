@@ -37,18 +37,14 @@ export default function Explore() {
     const [creators, setCreators] = useState<any[]>([]);
     const [loadingCreators, setLoadingCreators] = useState(true);
 
-    // Fetch real creators from API
+    // Fetch creators from API. We show everyone who has a profile row —
+    // creators without a deployed subscription contract still have real PPV
+    // posts and tips, which matters for discovery on a fresh platform.
     useEffect(() => {
         fetch('/api/creators')
             .then(r => r.json())
             .then(data => {
-                if (Array.isArray(data)) {
-                    // Only show creators with a deployed contract
-                    const active = data.filter((c: any) =>
-                        c.contractAddress && c.contractAddress !== '' && c.contractAddress !== '0x0000000000000000000000000000000000000000'
-                    );
-                    setCreators(active);
-                }
+                if (Array.isArray(data)) setCreators(data);
             })
             .catch(() => {})
             .finally(() => setLoadingCreators(false));

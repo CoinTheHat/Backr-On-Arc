@@ -86,16 +86,53 @@ export default function DemoPage() {
         // ============ STEP 1: Gateway deposit (only if balance < $0.10) ============
         updateStep('gateway', { status: 'running' });
         try {
-            const current = parseFloat(balance ?? '0');
-            if (current < 0.1) {
-                const tx = await deposit('0.5');
-                updateStep('gateway', { status: 'done', txHash: tx, result: 'Deposited $0.50 to Gateway' });
+            // Refresh balance first to avoid stale reads
+            let current = 0;
+            try { current = parseFloat(await getBalance()); } catch { current = parseFloat(balance ?? '0'); }
+
+            if (current >= 0.1) {
+                updateStep('gateway', { status: 'done', result: `Gateway already funded ($${current.toFixed(4)}) — skipping deposit` });
             } else {
-                updateStep('gateway', { status: 'done', result: `Gateway already funded ($${balance})` });
+                // Try deposit with up to 3 retries for Arc Testnet mempool congestion
+                let lastErr: any;
+                let depositedTx: string | undefined;
+                for (let attempt = 1; attempt <= 3; attempt++) {
+                    try {
+                        depositedTx = await deposit('0.5');
+                        break;
+                    } catch (err: any) {
+                        lastErr = err;
+                        const msg = String(err?.message || '');
+                        const transient = msg.includes('txpool is full') || msg.includes('nonce') || msg.includes('timeout') || msg.includes('replacement');
+                        if (!transient || attempt === 3) break;
+                        updateStep('gateway', { status: 'running', result: `Arc mempool busy — retrying (${attempt}/3)…` });
+                        await new Promise(r => setTimeout(r, 4000 * attempt));
+                    }
+                }
+                if (depositedTx) {
+                    updateStep('gateway', { status: 'done', txHash: depositedTx, result: 'Deposited $0.50 to Gateway' });
+                    await getBalance().catch(() => {});
+                } else {
+                    // Re-check balance — deposit may have landed despite the error
+                    let postBal = 0;
+                    try { postBal = parseFloat(await getBalance()); } catch {}
+                    if (postBal >= 0.1) {
+                        updateStep('gateway', { status: 'done', result: `Gateway funded ($${postBal.toFixed(4)})` });
+                    } else {
+                        const raw = String(lastErr?.message || 'Deposit failed');
+                        const friendly = raw.includes('txpool is full')
+                            ? 'Arc Testnet mempool is full right now. Try again in ~30s, or fund Gateway manually at /nanopayments.'
+                            : raw.includes('User rejected')
+                            ? 'Deposit cancelled in wallet.'
+                            : raw.slice(0, 120);
+                        updateStep('gateway', { status: 'error', result: friendly });
+                        setIsRunning(false);
+                        return;
+                    }
+                }
             }
-            await getBalance().catch(() => {});
         } catch (e: any) {
-            updateStep('gateway', { status: 'error', result: e.message?.slice(0, 80) });
+            updateStep('gateway', { status: 'error', result: e.message?.slice(0, 120) });
             setIsRunning(false);
             return;
         }

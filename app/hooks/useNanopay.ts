@@ -164,12 +164,28 @@ export function useNanopay(): NanopayState & NanopayActions {
     const { address: addr } = requireWallet();
     if (!publicClient) throw new Error("Public client not available");
 
-    const raw = (await publicClient.readContract({
-      address: GATEWAY_WALLET,
-      abi: GATEWAY_WALLET_ABI,
-      functionName: "availableBalance",
-      args: [USDC_ADDRESS, addr],
-    })) as bigint;
+    // Prefer totalBalance (includes freshly deposited funds). availableBalance
+    // subtracts any pending withdrawal holds so it can read 0 even when a
+    // deposit just settled — bad UX. If totalBalance is unavailable for some
+    // reason fall back to availableBalance.
+    let raw: bigint = BigInt(0);
+    try {
+      raw = (await publicClient.readContract({
+        address: GATEWAY_WALLET,
+        abi: GATEWAY_WALLET_ABI,
+        functionName: "totalBalance",
+        args: [USDC_ADDRESS, addr],
+      })) as bigint;
+    } catch {
+      try {
+        raw = (await publicClient.readContract({
+          address: GATEWAY_WALLET,
+          abi: GATEWAY_WALLET_ABI,
+          functionName: "availableBalance",
+          args: [USDC_ADDRESS, addr],
+        })) as bigint;
+      } catch {}
+    }
 
     const formatted = formatUnits(raw, 6);
     setBalance(formatted);
@@ -271,22 +287,22 @@ export function useNanopay(): NanopayState & NanopayActions {
         console.log("[useNanopay] Deposit submitted:", depositTx);
         onStatus?.('Deposit submitted — balance will update in a few seconds.');
 
-        // Kick off balance polling in the background (non-blocking)
+        // Kick off balance polling in the background (non-blocking).
+        // Use totalBalance — availableBalance can stay at 0 when pending
+        // withdrawal locks are in play, hiding a successful deposit.
         (async () => {
-          for (let i = 0; i < 30; i++) {
+          for (let i = 0; i < 45; i++) {
             await new Promise(r => setTimeout(r, 2000));
             try {
               const raw = (await publicClient.readContract({
                 address: GATEWAY_WALLET,
                 abi: GATEWAY_WALLET_ABI,
-                functionName: "availableBalance",
+                functionName: "totalBalance",
                 args: [USDC_ADDRESS, addr],
               })) as bigint;
-              if (raw >= depositAmount / BigInt(2)) {
-                setBalance(formatUnits(raw, 6));
-                setBalanceRaw(raw);
-                break;
-              }
+              setBalance(formatUnits(raw, 6));
+              setBalanceRaw(raw);
+              if (raw >= depositAmount / BigInt(2)) break;
             } catch {}
           }
         })();

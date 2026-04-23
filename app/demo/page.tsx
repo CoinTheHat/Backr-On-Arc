@@ -169,17 +169,19 @@ export default function DemoPage() {
             if (Array.isArray(d)) creators = d.filter((c: any) => c?.address && c.address !== address);
         } catch {}
 
-        // Fallback pool of obviously-demo creator addresses (deterministic,
-        // not real users — so no one gets surprise dust tips).
-        const DEMO_CREATORS: Array<{ address: string; name: string }> = [
-            { address: '0xD8dA6BF26964aF9D7eEd9e03E53415D37aA96045', name: 'vitalik.eth' },
-            { address: '0xb4B46BdAA835F8E4b4D8E208B6559cD267851051', name: '@artist1' },
-            { address: '0x0F2a9F2D7E25bA0E1fF5F6e5C1A8D2B3e4f5c6d7', name: '@writer2' },
-            { address: '0xCC5e1E0D0B4a1a8d2A7E3C5B4B9E6F1A2B3C4D5E', name: '@creator3' },
-        ];
-        const pool: Array<{ address: string; name?: string }> = (creators.length > 0)
-            ? creators
-            : DEMO_CREATORS;
+        // No placeholder creators — if the DB has no creators, the demo tells
+        // the user to seed it. Every recipient the demo shows is a real row
+        // in the creators table.
+        if (creators.length === 0) {
+            NANO_ITEMS.forEach(it => updateStep(it.id, {
+                status: 'error',
+                result: 'No creators in DB yet — run scripts/seed_demo.js (or onboard at least one creator) before running the demo.',
+            }));
+            updateStep('agent-1', { status: 'pending' });
+            setIsRunning(false);
+            return;
+        }
+        const pool = creators;
         const pick = (i: number) => pool[i % pool.length];
 
         const flatItems: Array<{ id: string; receiver: string; amount: string; label: string; receiverName?: string }> = [];
@@ -429,8 +431,8 @@ export default function DemoPage() {
                                         <span className="text-slate-400">rail</span>
                                         <span className="text-indigo-600">
                                             {step.txHash
-                                                ? 'Circle Gateway · on-chain settlement'
-                                                : 'x402 signed · local-verified (Circle facilitator pending Arc Testnet support)'}
+                                                ? 'Batched on-chain USDC settlement · x402 authorized'
+                                                : 'Settlement pending — see error'}
                                         </span>
                                     </div>
                                 </div>

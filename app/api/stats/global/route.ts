@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/utils/db';
 
+// Stats must always be fresh — never cache on the edge or in Next's data cache
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
     try {
         const stats = await db.stats.getCounts();

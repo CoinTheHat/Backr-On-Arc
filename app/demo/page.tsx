@@ -40,7 +40,8 @@ export default function DemoPage() {
 
     const refreshTxCount = async () => {
         try {
-            const r = await fetch('/api/stats/global');
+            // Bust every cache layer (Next, CDN, browser)
+            const r = await fetch('/api/stats/global?t=' + Date.now(), { cache: 'no-store' });
             const d = await r.json();
             setTxCount(d.total ?? d.totalTxns ?? 0);
         } catch {}
@@ -149,13 +150,20 @@ export default function DemoPage() {
             }
         }
 
+        let recordedCount = 0;
         try {
-            await fetch('/api/demo/record-batch', {
+            const recRes = await fetch('/api/demo/record-batch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sender: address, items: flatItems, signature: `gateway:${address}:${Date.now()}` }),
+                cache: 'no-store',
             });
-        } catch {}
+            const recData = await recRes.json().catch(() => ({}));
+            recordedCount = recData?.recorded ?? flatItems.length;
+            console.log('[demo] recorded nanopayments:', recordedCount);
+        } catch (e) {
+            console.error('[demo] record-batch failed:', e);
+        }
 
         // Animate each nano-step completion — debited silently from Gateway
         for (const it of NANO_ITEMS) {
@@ -166,6 +174,8 @@ export default function DemoPage() {
             } else {
                 updateStep(it.id, { status: 'done', result: `Debited $${it.amount} from Gateway` });
             }
+            // Refresh tx counter mid-animation so the number visibly climbs
+            refreshTxCount();
         }
 
         await refreshTxCount();

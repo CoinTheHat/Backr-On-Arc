@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { useNanopay } from '@/app/hooks/useNanopay';
-import { Zap, Wallet, TrendingUp, ArrowLeft, Loader2, CheckCircle, AlertCircle, ExternalLink, Upload, Download, RefreshCw } from 'lucide-react';
+import { Zap, Wallet, TrendingUp, ArrowLeft, Loader2, CheckCircle, AlertCircle, ExternalLink, Upload, Download, RefreshCw, Clock } from 'lucide-react';
 import { ARC_EXPLORER_URL } from '@/app/utils/constants';
 
 export default function NanopaymentsPage() {
     const { isConnected } = useAccount();
-    const { balance, deposit, withdraw: gwWithdraw, getBalance, isLoading, error } = useNanopay();
+    const { balance, deposit, withdraw: gwWithdraw, getBalance, isLoading, error, pendingDeposits } = useNanopay();
 
     const [depositAmt, setDepositAmt] = useState('5');
     const [withdrawAmt, setWithdrawAmt] = useState('');
@@ -98,6 +98,37 @@ export default function NanopaymentsPage() {
                             <Wallet size={28} />
                         </div>
                     </div>
+
+                    {/* Pending deposits */}
+                    {pendingDeposits && pendingDeposits.length > 0 && (
+                        <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Clock size={14} className="text-amber-700 animate-pulse" />
+                                <p className="text-xs font-bold uppercase tracking-wider text-amber-800">Pending Deposits</p>
+                                <span className="ml-auto text-xs font-bold text-amber-900">
+                                    +${pendingDeposits.reduce((s, p) => s + parseFloat(p.amount), 0).toFixed(2)} incoming
+                                </span>
+                            </div>
+                            <p className="text-xs text-amber-700 mb-2">
+                                Your deposit is in the Arc Testnet mempool. Balance updates automatically once the block confirms — usually under a minute, but congestion can stretch it to several minutes.
+                            </p>
+                            <ul className="space-y-1">
+                                {pendingDeposits.map(p => (
+                                    <li key={p.txHash} className="flex items-center justify-between text-xs">
+                                        <span className="font-bold text-amber-900">+${p.amount} USDC</span>
+                                        <a
+                                            href={`${ARC_EXPLORER_URL}/tx/${p.txHash}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-amber-700 hover:underline inline-flex items-center gap-1"
+                                        >
+                                            {p.txHash.slice(0, 10)}…{p.txHash.slice(-6)} <ExternalLink size={10} />
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
                     {!isConnected && (
                         <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">

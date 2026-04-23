@@ -104,11 +104,18 @@ const GATEWAY_WALLET_ABI = [
 // Types
 // ---------------------------------------------------------------------------
 
+export interface PendingDeposit {
+  txHash: string;
+  amount: string; // formatted USDC (e.g. "1.00")
+  submittedAt: number; // epoch ms
+}
+
 export interface NanopayState {
   isLoading: boolean;
   error: string | null;
   balance: string | null; // formatted USDC (e.g. "12.50")
   balanceRaw: bigint | null;
+  pendingDeposits: PendingDeposit[];
 }
 
 export interface NanopayActions {
@@ -144,6 +151,48 @@ export function useNanopay(): NanopayState & NanopayActions {
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<string | null>(null);
   const [balanceRaw, setBalanceRaw] = useState<bigint | null>(null);
+  const [pendingDeposits, setPendingDeposits] = useState<PendingDeposit[]>([]);
+
+  // ---- Pending deposits persistence (localStorage, scoped per address) ----
+  const pendingKey = address ? `backr:pendingDeposits:${address.toLowerCase()}` : null;
+
+  const loadPending = useCallback((): PendingDeposit[] => {
+    if (typeof window === 'undefined' || !pendingKey) return [];
+    try {
+      const raw = window.localStorage.getItem(pendingKey);
+      if (!raw) return [];
+      const arr = JSON.parse(raw) as PendingDeposit[];
+      // Drop deposits older than 24h — they either landed or got dropped from mempool
+      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+      return Array.isArray(arr) ? arr.filter(p => p.submittedAt > cutoff) : [];
+    } catch { return []; }
+  }, [pendingKey]);
+
+  const savePending = useCallback((next: PendingDeposit[]) => {
+    if (typeof window === 'undefined' || !pendingKey) return;
+    try { window.localStorage.setItem(pendingKey, JSON.stringify(next)); } catch {}
+    setPendingDeposits(next);
+  }, [pendingKey]);
+
+  const addPending = useCallback((p: PendingDeposit) => {
+    const next = [...loadPending(), p];
+    savePending(next);
+  }, [loadPending, savePending]);
+
+  const clearPendingBelow = useCallback((confirmedRaw: bigint) => {
+    // If on-chain balance has absorbed the pending amounts, drop them from the list.
+    const current = loadPending();
+    if (current.length === 0) return;
+    const totalPendingRaw = current.reduce((s, p) => s + parseUnits(p.amount, 6), BigInt(0));
+    if (confirmedRaw >= totalPendingRaw) {
+      savePending([]);
+    }
+  }, [loadPending, savePending]);
+
+  // Hydrate pending deposits when address becomes available
+  useEffect(() => {
+    setPendingDeposits(loadPending());
+  }, [loadPending]);
 
   // -----------------------------------------------------------------------
   // Helpers
@@ -190,8 +239,9 @@ export function useNanopay(): NanopayState & NanopayActions {
     const formatted = formatUnits(raw, 6);
     setBalance(formatted);
     setBalanceRaw(raw);
+    clearPendingBelow(raw);
     return formatted;
-  }, [requireWallet, publicClient]);
+  }, [requireWallet, publicClient, clearPendingBelow]);
 
   // -----------------------------------------------------------------------
   // deposit — approve + deposit USDC into gateway wallet
@@ -287,12 +337,15 @@ export function useNanopay(): NanopayState & NanopayActions {
         console.log("[useNanopay] Deposit submitted:", depositTx);
         onStatus?.('Deposit submitted — balance will update in a few seconds.');
 
+        // Track as pending so UI can show a badge until the tx settles
+        addPending({ txHash: depositTx, amount, submittedAt: Date.now() });
+
         // Kick off balance polling in the background (non-blocking).
         // Use totalBalance — availableBalance can stay at 0 when pending
         // withdrawal locks are in play, hiding a successful deposit.
         (async () => {
-          for (let i = 0; i < 45; i++) {
-            await new Promise(r => setTimeout(r, 2000));
+          for (let i = 0; i < 60; i++) {
+            await new Promise(r => setTimeout(r, 3000));
             try {
               const raw = (await publicClient.readContract({
                 address: GATEWAY_WALLET,
@@ -302,6 +355,7 @@ export function useNanopay(): NanopayState & NanopayActions {
               })) as bigint;
               setBalance(formatUnits(raw, 6));
               setBalanceRaw(raw);
+              clearPendingBelow(raw);
               if (raw >= depositAmount / BigInt(2)) break;
             } catch {}
           }
@@ -514,6 +568,7 @@ export function useNanopay(): NanopayState & NanopayActions {
     error,
     balance,
     balanceRaw,
+    pendingDeposits,
     // Actions
     deposit,
     withdraw,

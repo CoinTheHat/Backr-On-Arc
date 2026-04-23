@@ -71,7 +71,7 @@ export default function NanopaymentsPage() {
                         </div>
                     </div>
                     <p className="text-sm opacity-90 leading-relaxed mt-4">
-                        Deposit USDC once into <strong>Circle Gateway</strong>. From then on, every PPV unlock and nano-tip is an off-chain EIP-712 signature — no gas, no wallet prompts per payment. Circle batches them into one on-chain settlement. Creators collect earnings from their own contract on the <Link href="/dashboard" className="underline">dashboard</Link>.
+                        Deposit USDC once into <strong>Circle Gateway</strong>. Every PPV unlock, nano-tip, commission, and subscription afterward is pulled silently from your Gateway balance — no gas, no wallet prompts. <strong>Works for everyone:</strong> supporters fund micro-content and creators use it to commission other creators or back fellow artists. Creator earnings from your own subscription contract are collected on the <Link href="/dashboard" className="underline">dashboard</Link>.
                     </p>
                 </div>
 
@@ -219,6 +219,29 @@ export default function NanopaymentsPage() {
                             <p className="text-red-800">{gwWithdrawError}</p>
                         </div>
                     )}
+                </div>
+
+                {/* What's routed where */}
+                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm mb-6">
+                    <h3 className="font-bold text-slate-900 mb-4">What Gets Debited From Your Gateway</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl">
+                            <p className="font-bold text-indigo-900 mb-2">Silent (Gateway)</p>
+                            <ul className="space-y-1 text-indigo-800 text-xs">
+                                <li>• PPV post unlocks</li>
+                                <li>• Nano-tips to creators</li>
+                                <li>• Micro-content views</li>
+                            </ul>
+                        </div>
+                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                            <p className="font-bold text-amber-900 mb-2">MetaMask (On-chain)</p>
+                            <ul className="space-y-1 text-amber-800 text-xs">
+                                <li>• Tier subscriptions</li>
+                                <li>• ERC-8183 commissions</li>
+                                <li>• Gateway deposit / withdraw</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 {/* How it works */}

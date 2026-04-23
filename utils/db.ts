@@ -57,7 +57,7 @@ const initDb = async () => {
             CREATE TABLE IF NOT EXISTS tips (
                 id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
                 sender TEXT,
-                receiver TEXT REFERENCES creators(address),
+                receiver TEXT, -- intentionally NOT a FK: batched nanopayments can target treasury / non-creator addresses
                 amount NUMERIC,
                 currency TEXT,
                 message TEXT,

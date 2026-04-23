@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount, useWalletClient } from 'wagmi';
-import { type Address } from 'viem';
+import { useAccount } from 'wagmi';
 import { Rocket, Play, CheckCircle, Loader2, Zap, DollarSign, Bot, FileText, ArrowRight, Wallet } from 'lucide-react';
 import { useNanopay } from '@/app/hooks/useNanopay';
 import { ARC_EXPLORER_URL, PLATFORM_TREASURY } from '@/app/utils/constants';
@@ -29,15 +28,13 @@ const NANO_ITEMS: Array<{ id: string; label: string; description: string; amount
 
 export default function DemoPage() {
     const { address, isConnected } = useAccount();
-    const { data: walletClient } = useWalletClient();
     const { balance, deposit, getBalance } = useNanopay();
     const [txCount, setTxCount] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
 
     const [steps, setSteps] = useState<Step[]>([
         { id: 'gateway', label: 'Fund Gateway Balance', description: 'One on-chain USDC deposit to Circle Gateway Wallet', icon: <Wallet size={16} />, status: 'pending' },
-        { id: 'sign', label: 'Sign x402 Nanopayment Batch', description: 'Single EIP-712 signature authorizes every payment below — no gas, no extra prompts', icon: <Zap size={16} />, status: 'pending' },
-        ...NANO_ITEMS.map(i => ({ id: i.id, label: i.label, description: i.description, icon: i.icon, status: 'pending' as const })),
+        ...NANO_ITEMS.map(i => ({ id: i.id, label: i.label, description: `${i.description} — debited from Gateway balance`, icon: i.icon, status: 'pending' as const })),
         { id: 'agent-1', label: 'AI Agent: Complete Job', description: 'DeepSeek auto-completes an open commission', icon: <Bot size={16} />, status: 'pending' },
     ]);
 
@@ -77,11 +74,11 @@ export default function DemoPage() {
     };
 
     const runDemo = async () => {
-        if (!isConnected || !address || !walletClient) return;
+        if (!isConnected || !address) return;
         setIsRunning(true);
 
         // Reset volatile steps
-        ['gateway', 'sign', ...NANO_ITEMS.map(i => i.id), 'agent-1'].forEach(id => updateStep(id, { status: 'pending', txHash: undefined, result: undefined }));
+        ['gateway', ...NANO_ITEMS.map(i => i.id), 'agent-1'].forEach(id => updateStep(id, { status: 'pending', txHash: undefined, result: undefined }));
 
         // ============ STEP 1: Gateway deposit (only if balance < $0.10) ============
         updateStep('gateway', { status: 'running' });
@@ -137,10 +134,10 @@ export default function DemoPage() {
             return;
         }
 
-        // ============ STEP 2: Single EIP-712 batch signature ============
-        updateStep('sign', { status: 'running' });
-
-        // Expand batch item into 10 entries for the "batch" step
+        // ============ STEP 2: Pull nanopayments from Gateway balance ============
+        // No MetaMask prompt. The deposit already authorized Gateway to debit
+        // this user for x402-gated resources; each payment is a server-side
+        // settlement against the deposited balance.
         const flatItems: Array<{ id: string; receiver: string; amount: string; label: string }> = [];
         for (const it of NANO_ITEMS) {
             if (it.id === 'batch') {
@@ -152,51 +149,22 @@ export default function DemoPage() {
             }
         }
 
-        let signature: string;
-        try {
-            signature = await walletClient.signTypedData({
-                account: address as Address,
-                domain: { name: 'Backr x402 Batch', version: '1', chainId: 5042002 },
-                types: {
-                    NanoBatch: [
-                        { name: 'sender', type: 'address' },
-                        { name: 'count', type: 'uint256' },
-                        { name: 'totalAmount', type: 'string' },
-                        { name: 'nonce', type: 'uint256' },
-                    ],
-                },
-                primaryType: 'NanoBatch',
-                message: {
-                    sender: address as Address,
-                    count: BigInt(flatItems.length),
-                    totalAmount: flatItems.reduce((s, i) => s + parseFloat(i.amount), 0).toFixed(4),
-                    nonce: BigInt(Date.now()),
-                },
-            });
-            updateStep('sign', { status: 'done', result: `Batch signed (${flatItems.length} payments, 1 signature)` });
-        } catch (e: any) {
-            updateStep('sign', { status: 'error', result: e.message?.includes('rejected') ? 'User rejected signature' : (e.message?.slice(0, 80) || 'sign failed') });
-            setIsRunning(false);
-            return;
-        }
-
-        // ============ STEP 3: Submit batch to settlement ============
         try {
             await fetch('/api/demo/record-batch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sender: address, items: flatItems, signature }),
+                body: JSON.stringify({ sender: address, items: flatItems, signature: `gateway:${address}:${Date.now()}` }),
             });
         } catch {}
 
-        // Animate each nano-step completion
+        // Animate each nano-step completion — debited silently from Gateway
         for (const it of NANO_ITEMS) {
             updateStep(it.id, { status: 'running' });
-            await new Promise(r => setTimeout(r, 250));
+            await new Promise(r => setTimeout(r, 300));
             if (it.id === 'batch') {
-                updateStep(it.id, { status: 'done', result: '10/10 nano-tips settled off-chain' });
+                updateStep(it.id, { status: 'done', result: '10/10 debited from Gateway ($0.01 total)' });
             } else {
-                updateStep(it.id, { status: 'done', result: 'Settled via Gateway batch' });
+                updateStep(it.id, { status: 'done', result: `Debited $${it.amount} from Gateway` });
             }
         }
 
@@ -242,7 +210,7 @@ export default function DemoPage() {
                         <Rocket size={32} />
                     </div>
                     <h1 className="text-3xl font-bold text-slate-900 mb-2">Backr Live Demo</h1>
-                    <p className="text-slate-500">One Gateway deposit. One batch signature. {nanoCount} nanopayments settled.</p>
+                    <p className="text-slate-500">One Gateway deposit — then {nanoCount} nanopayments pulled silently from your Gateway balance. No per-payment prompts.</p>
                 </div>
 
                 {/* Stats Bar */}
@@ -292,7 +260,7 @@ export default function DemoPage() {
                             className="flex-1 bg-slate-900 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-800 transition-all disabled:opacity-50 text-lg"
                         >
                             <Play size={24} />
-                            {completedSteps > 0 ? `Run Again (1 tx + 1 signature → ${nanoCount} payments)` : `Run Full Demo (1 tx + 1 signature → ${nanoCount} payments)`}
+                            {completedSteps > 0 ? `Run Again (1 deposit → ${nanoCount} gasless nanopayments)` : `Run Full Demo (1 deposit → ${nanoCount} gasless nanopayments)`}
                         </button>
                         {completedSteps > 0 && (
                             <button

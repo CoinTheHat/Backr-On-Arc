@@ -1,7 +1,7 @@
 # Site Vision: Backr
 
 ## 1. Platform Overview
-Backr is a decentralized, censorship-resistant membership platform built on the **Mantle Network**. It empowers creators to own their audience, set their own prices, and receive instant payouts without intermediaries.
+Backr is a decentralized, censorship-resistant creator platform built on the **Arc Network** — Circle's stablecoin-native L1. Creators own their audience, set their own prices, and receive instant USDC payouts, with Circle Nanopayments (x402 + Gateway) for micro-content, ERC-8183 escrow for custom commissions, and on-chain AI agents that act on behalf of users.
 
 ## 2. Core Value Props
 *   **Decentralized:** Smart contract-based memberships.

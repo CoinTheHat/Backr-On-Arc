@@ -2,7 +2,7 @@
 
 **Date:** 2026-01-14
 **Auditor:** Antigravity (AI Auditor)
-**Target:** Backr Protocol (Mantle Sepolia)
+**Target:** Backr Protocol (Arc Sepolia)
 **Files Audited:**
 - `contracts/SubscriptionFactory.sol`
 - `contracts/SubscriptionContract.sol`

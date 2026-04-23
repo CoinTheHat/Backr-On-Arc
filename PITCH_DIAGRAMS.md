@@ -44,7 +44,7 @@ sequenceDiagram
 
     Note over Fan, Creator: Subscription Phase
     Fan->>UI: Select Tier & Click 'Subscribe'
-    UI->>Sub: Fan Pays (e.g. 10 MNT)
+    UI->>Sub: Fan Pays (e.g. 10 USDC)
     Sub-->>Sub: Record Subscription & Expiry
     UI-->>Fan: Unlock Exclusive Content
 
@@ -52,8 +52,8 @@ sequenceDiagram
     Creator->>UI: Click 'Withdraw'
     UI->>Sub: Call Withdraw() Function
     Sub->>Sub: Calculate Fee (5%)
-    Sub->>Treasury: Transfer 0.5 MNT (Fee)
-    Sub->>Creator: Transfer 9.5 MNT (Earnings)
+    Sub->>Treasury: Transfer 0.5 USDC (Fee)
+    Sub->>Creator: Transfer 9.5 USDC (Earnings)
 ```
 
 ---

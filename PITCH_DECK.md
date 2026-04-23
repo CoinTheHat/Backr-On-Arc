@@ -18,14 +18,14 @@
 ---
 
 ## Slide 3: The Solution
-**Backr: Patreon on Mantle.**
+**Backr: Patreon on Arc.**
 
 A decentralized membership platform where creators own their relationship with their audience.
 
 *   **Censorship Resistant:** Content and subscriptions live on-chain.
 *   **Instant Payouts:** Revenue streams directly to the creator's wallet.
 *   **Low Fees:** Only 5% platform fee (vs. industry standard 8-12%).
-*   **Global Payments:** Accept payments from anyone in the world via USDC/MNT, with near-zero gas fees.
+*   **Global Payments:** Accept payments from anyone in the world in USDC (native gas on Arc), with near-zero fees and Circle Nanopayments for $0.001 unlocks.
 
 ---
 
@@ -82,7 +82,7 @@ A decentralized membership platform where creators own their relationship with t
 ## Slide 9: Competitive Advantage
 **Why Backr Wins.**
 
-| Feature | Backr (Mantle) | Patreon | Substack |
+| Feature | Backr (Arc) | Patreon | Substack |
 | :--- | :--- | :--- | :--- |
 | **Fees** | 5% | 8-12% | 10% |
 | **Payouts** | Instant | Monthly | Monthly |
@@ -94,7 +94,7 @@ A decentralized membership platform where creators own their relationship with t
 ## Slide 10: Roadmap
 **Building the Future of Patronage.**
 
-*   **Q1 2026 (Now):** MVP Launch on Mantle Mainnet. Basic Tiers & Posting.
+*   **Q1 2026 (Now):** MVP Launch on Arc Mainnet. Basic Tiers & Posting.
 *   **Q2 2026:** NFT Integration (Hold-to-Access), Comments & Likes.
 *   **Q3 2026:** Mobile App & Notification System.
 *   **Q4 2026:** Fiat On-ramp & Gasless Transactions for Fans.
@@ -107,4 +107,4 @@ A decentralized membership platform where creators own their relationship with t
 We are building the financial layer for the next generation of creators.
 
 *   **Website:** [backr.app]
-*   **Network:** Built on Mantle Network
+*   **Network:** Built on Arc Network

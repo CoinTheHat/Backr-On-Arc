@@ -310,6 +310,23 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const handlePPVPurchase = async (post: any) => {
         setPurchasingPostId(post.id);
         try {
+            const price = parseFloat(String(post.ppvPrice || 0));
+            const gw = parseFloat(gatewayBalance ?? '0');
+
+            // Prefer Gateway nanopayments when balance is sufficient — no MetaMask prompt
+            if (gw >= price && price > 0) {
+                const ref = `gateway:${address}:${Date.now()}`;
+                const res = await fetch(`/api/posts/${post.id}/purchase`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ buyerAddress: address, txHash: ref, method: 'gateway' })
+                });
+                if (!res.ok) throw new Error('Purchase record failed');
+                await refreshPosts();
+                return;
+            }
+
+            // Fallback: not enough Gateway balance → on-chain USDC transfer
             const tx = await send(creatorProfile.address, String(post.ppvPrice));
             if (!tx) throw new Error('Transaction failed');
             await fetch(`/api/posts/${post.id}/purchase`, {

@@ -31,18 +31,24 @@ export const dynamic = 'force-dynamic';
 // Load Circle's Arc config + facilitator client lazily so Next build doesn't
 // choke if the packages aren't resolvable at build-time.
 async function getFacilitator() {
-    const [{ BatchFacilitatorClient }, clientMod, coreServer] = await Promise.all([
+    const [{ BatchFacilitatorClient }, clientMod, coreHttp] = await Promise.all([
         import('@circle-fin/x402-batching/server'),
         import('@circle-fin/x402-batching/client'),
-        import('@x402/core/server'),
+        // NOTE: the header encoders live in @x402/core/http, not /server. The
+        // /server subpath only has resource-server plumbing (x402ResourceServer
+        // etc.) — importing encodePaymentRequiredHeader from /server silently
+        // returns undefined and the call blows up at runtime, turning the 402
+        // into an HTML 500 and making the client choke on "Unexpected end of
+        // JSON input".
+        import('@x402/core/http'),
     ]);
     const arc = (clientMod as any).CHAIN_CONFIGS.arcTestnet;
     return {
         facilitator: new BatchFacilitatorClient(),
         usdc: arc.usdc as `0x${string}`,
         gatewayWallet: arc.gatewayWallet as `0x${string}`,
-        encodePaymentRequiredHeader: (coreServer as any).encodePaymentRequiredHeader as (req: unknown) => string,
-        encodePaymentResponseHeader: (coreServer as any).encodePaymentResponseHeader as (res: unknown) => string,
+        encodePaymentRequiredHeader: (coreHttp as any).encodePaymentRequiredHeader as (req: unknown) => string,
+        encodePaymentResponseHeader: (coreHttp as any).encodePaymentResponseHeader as (res: unknown) => string,
     };
 }
 

@@ -113,7 +113,7 @@ export interface NanopayState {
 
 export interface NanopayActions {
   /** Deposit USDC into the Circle Gateway Wallet (one on-chain tx). */
-  deposit: (amount: string) => Promise<Hex>;
+  deposit: (amount: string, onStatus?: (msg: string) => void) => Promise<Hex>;
   /** Initiate withdrawal of USDC from Gateway Wallet back to user wallet. */
   withdraw: (amount: string) => Promise<Hex>;
   /** Refresh the gateway balance. */
@@ -182,12 +182,20 @@ export function useNanopay(): NanopayState & NanopayActions {
   // -----------------------------------------------------------------------
 
   const deposit = useCallback(
-    async (amount: string): Promise<Hex> => {
+    async (amount: string, onStatus?: (msg: string) => void): Promise<Hex> => {
       const { address: addr, walletClient: wc } = requireWallet();
       if (!publicClient) throw new Error("Public client not available");
 
       setIsLoading(true);
       setError(null);
+
+      // Helper: wrap a call with a hard timeout
+      const withTimeout = async <T,>(p: Promise<T>, ms: number, label: string): Promise<T> => {
+        return Promise.race([
+          p,
+          new Promise<T>((_, rej) => setTimeout(() => rej(new Error(`${label} timed out after ${ms / 1000}s — MetaMask may have dropped the request. Please retry.`)), ms)),
+        ]);
+      };
 
       try {
         const depositAmount = parseUnits(amount, 6);
@@ -215,12 +223,18 @@ export function useNanopay(): NanopayState & NanopayActions {
         // don't hang the UI if Arc is congested.
         if (allowance < depositAmount) {
           console.log("[useNanopay] Approving gateway wallet...");
-          const approveTx = await wc.writeContract({
-            address: USDC_ADDRESS,
-            abi: ERC20_ABI,
-            functionName: "approve",
-            args: [GATEWAY_WALLET, depositAmount],
-          });
+          onStatus?.('Confirm USDC approval in MetaMask…');
+          const approveTx = await withTimeout(
+            wc.writeContract({
+              address: USDC_ADDRESS,
+              abi: ERC20_ABI,
+              functionName: "approve",
+              args: [GATEWAY_WALLET, depositAmount],
+            }),
+            120_000,
+            'Approval signature',
+          );
+          onStatus?.('Waiting for approval to confirm…');
           try {
             await publicClient.waitForTransactionReceipt({ hash: approveTx, timeout: 60_000 });
           } catch {
@@ -243,13 +257,19 @@ export function useNanopay(): NanopayState & NanopayActions {
         // Balance is polled by the caller / getBalance so we don't block the
         // UI on Arc testnet mempool confirmations.
         console.log("[useNanopay] Depositing into gateway...");
-        const depositTx = await wc.writeContract({
-          address: GATEWAY_WALLET,
-          abi: GATEWAY_WALLET_ABI,
-          functionName: "deposit",
-          args: [USDC_ADDRESS, depositAmount],
-        });
+        onStatus?.('Confirm deposit in MetaMask…');
+        const depositTx = await withTimeout(
+          wc.writeContract({
+            address: GATEWAY_WALLET,
+            abi: GATEWAY_WALLET_ABI,
+            functionName: "deposit",
+            args: [USDC_ADDRESS, depositAmount],
+          }),
+          120_000,
+          'Deposit signature',
+        );
         console.log("[useNanopay] Deposit submitted:", depositTx);
+        onStatus?.('Deposit submitted — balance will update in a few seconds.');
 
         // Kick off balance polling in the background (non-blocking)
         (async () => {

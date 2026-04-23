@@ -160,7 +160,9 @@ export default function AIChat() {
                 const { amount } = action.params;
                 if (!amount) throw new Error('Missing deposit amount');
 
-                const txHash = await depositToGateway(String(amount));
+                const txHash = await depositToGateway(String(amount), (msg) => {
+                    updateStatus({ status: 'running', message: msg });
+                });
                 updateStatus({ status: 'done', txHash: txHash as string, message: `Deposited $${amount} USDC to Gateway` });
             }
 

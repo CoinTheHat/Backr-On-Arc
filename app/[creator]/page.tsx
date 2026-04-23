@@ -528,8 +528,16 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     };
 
     const displayName = creatorProfile?.name || `Creator ${creatorId.substring(0, 4)}...`;
-    const avatar = creatorProfile?.avatarUrl || creatorProfile?.profileImage;
+    const uploadedAvatar = creatorProfile?.avatarUrl || creatorProfile?.profileImage;
+    const avatarSeed = (creatorProfile?.address || creatorId || displayName || 'anon').toString();
+    const avatar = uploadedAvatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${avatarSeed.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 64)}&backgroundColor=6366f1,8b5cf6,ec4899,10b981&size=256`;
     const cover = creatorProfile?.coverImage || creatorProfile?.coverUrl;
+
+    // onError handler: if uploaded image fails (Supabase 401 / 404) swap to generated
+    const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+        const fb = `https://api.dicebear.com/7.x/shapes/svg?seed=${avatarSeed.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 64)}&backgroundColor=6366f1,8b5cf6,ec4899,10b981&size=256`;
+        if (e.currentTarget.src !== fb) e.currentTarget.src = fb;
+    };
 
     return (
         <div className="min-h-screen bg-mist text-slate-900 font-sans pb-24 selection:bg-fuchsia-200">
@@ -720,13 +728,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             <div className="relative px-6 -mt-20 text-center z-20 max-w-2xl mx-auto">
                 <div className="relative inline-block">
                     <div className="w-36 h-36 rounded-full border-[6px] border-white shadow-xl overflow-hidden bg-white">
-                        {avatar ? (
-                            <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
-                        ) : (
-                            <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">
-                                <span className="text-4xl">?</span>
-                            </div>
-                        )}
+                        <img src={avatar} alt="Avatar" className="w-full h-full object-cover" onError={handleAvatarError} />
                     </div>
                     <div className="absolute bottom-2 right-2 bg-primary text-white p-1.5 rounded-full border-4 border-white shadow-sm">
                         <Check size={14} strokeWidth={4} />
@@ -868,7 +870,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                             <article key={i} className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
                                                 {/* Header */}
                                                 <div className="p-6 flex items-center gap-4">
-                                                    <img src={avatar || "https://via.placeholder.com/40"} alt="" className="w-10 h-10 rounded-full object-cover" />
+                                                    <img src={avatar} alt="" className="w-10 h-10 rounded-full object-cover" onError={handleAvatarError} />
                                                     <div>
                                                         <p className="text-sm font-bold text-slate-900">{displayName}</p>
                                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">

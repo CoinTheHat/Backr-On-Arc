@@ -379,10 +379,8 @@ export default function AIChat() {
             }
 
             else if (action.type === 'unlock_ppv') {
-                const { postId, amount, creatorAddress: postCreatorAddr } = action.params;
+                const { postId, amount, creatorAddress: postCreatorAddr, method } = action.params;
                 if (!postId || !amount) throw new Error('Missing postId or amount');
-
-                updateStatus({ status: 'running', message: 'Unlocking post...' });
 
                 // Resolve creator address if not provided
                 let toAddress = postCreatorAddr;
@@ -395,8 +393,34 @@ export default function AIChat() {
                     throw new Error('Could not resolve post creator address. Ask me to look up the post by title or open the creator profile.');
                 }
 
-                // Always unlock on-chain — we want a verifiable ArcScan tx,
-                // not a silent DB insert that reads as "nothing happened."
+                const price = parseFloat(String(amount));
+                const useGateway = method === 'gateway';
+                const gwEnough = gatewayBalance && parseFloat(gatewayBalance) >= price;
+
+                // Gateway path: user explicitly asked for silent debit via
+                // Gateway balance. No MetaMask popup, no on-chain tx per
+                // unlock — this is the whole point of nanopayments.
+                if (useGateway && gwEnough) {
+                    updateStatus({ status: 'running', message: 'Debiting Gateway balance…' });
+                    const ref = `gateway:${address}:${Date.now()}`;
+                    const res = await fetch(`/api/posts/${postId}/purchase`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ buyerAddress: address, txHash: ref, method: 'gateway' }),
+                    });
+                    if (!res.ok) throw new Error('Gateway settlement record failed');
+                    updateStatus({ status: 'done', message: `Post unlocked for $${amount} — debited silently from Gateway (no gas, no MetaMask)` });
+                    return;
+                }
+
+                // If user asked for Gateway but balance is short, say so
+                // instead of quietly switching to on-chain.
+                if (useGateway && !gwEnough) {
+                    throw new Error(`Gateway balance too low ($${gatewayBalance || '0'} < $${amount}). Deposit more at /nanopayments, or ask me to unlock on-chain.`);
+                }
+
+                // Default: on-chain USDC transfer (verifiable on ArcScan)
+                updateStatus({ status: 'running', message: 'Submitting on-chain unlock…' });
                 const txHash = await activeWc.writeContract({
                     address: TOKENS.USDC as Address,
                     abi: TIP20_ABI,
@@ -408,7 +432,7 @@ export default function AIChat() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ buyerAddress: address, txHash }),
                 });
-                updateStatus({ status: 'done', txHash, message: `Post unlocked for $${amount}` });
+                updateStatus({ status: 'done', txHash, message: `Post unlocked for $${amount} — on-chain` });
             }
 
             else if (action.type === 'request_commission') {
@@ -585,7 +609,7 @@ export default function AIChat() {
                                                     {action.type === 'create_post' && `New post: ${action.params.title}`}
                                                     {action.type === 'create_commission' && `Commission: ${action.params.title} ($${action.params.budget})`}
                                                     {action.type === 'request_commission' && `Request: ${action.params.title} → ${action.params.creator}`}
-                                                    {action.type === 'unlock_ppv' && `Unlock post for $${action.params.amount}`}
+                                                    {action.type === 'unlock_ppv' && `Unlock post for $${action.params.amount}${action.params.method === 'gateway' ? ' (Gateway, silent)' : ' (on-chain)'}`}
                                                 </span>
                                             </div>
                                             {action.message && <p className="mt-1 text-slate-600 ml-6">{action.message}</p>}

@@ -159,7 +159,7 @@ SUPPORTER EXECUTE ACTIONS (available to all users):
 - withdraw_gateway: {"amount":"5"} — Withdraws USDC from Gateway back to wallet
 - send_tip: {"to":"0x...","amount":"0.5"} — Sends direct USDC tip (5% platform fee applied)
 - subscribe_tier: {"creator":"username","tier":"Gold"} — Subscribes to a creator's tier
-- unlock_ppv: {"postId":"abc","amount":"0.005","creatorAddress":"0x..."} — Pays to unlock a PPV post
+- unlock_ppv: {"postId":"abc","amount":"0.005","creatorAddress":"0x...","method":"gateway"|"onchain"} — Pays to unlock a PPV post. Set method="gateway" ONLY if the user explicitly asks to use their Gateway balance (trigger words: "gateway ile", "gateway bakiyesiyle", "gateway'den", "gasless", "no gas", "silent", "nanopayment ile", "without metamask"). Otherwise omit method or set "onchain" so a real USDC transfer fires and the user gets an ArcScan tx.
 - request_commission: {"creator":"username","title":"Write an article about DeFi","description":"Deep dive...","budget":"10"} — Requests custom content from a creator with USDC budget
 `;
 

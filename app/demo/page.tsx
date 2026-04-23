@@ -9,6 +9,7 @@ import { ARC_EXPLORER_URL, PLATFORM_TREASURY } from '@/app/utils/constants';
 interface SettlementDetail {
     from: string;
     to: string;
+    toName?: string;
     amount: string;
     batchRef: string;
     timestamp: number;
@@ -148,16 +149,43 @@ export default function DemoPage() {
         // No MetaMask prompt. The deposit already authorized Gateway to debit
         // this user for x402-gated resources; each payment is a server-side
         // settlement against the deposited balance.
-        const flatItems: Array<{ id: string; receiver: string; amount: string; label: string }> = [];
-        for (const it of NANO_ITEMS) {
+        //
+        // Recipient strategy: fetch real creators from the DB and rotate
+        // through them so every nanopayment goes to an actual creator wallet
+        // (not the platform treasury). Falls back to well-known demo
+        // addresses when the DB is empty.
+        let creators: Array<{ address: string; name?: string }> = [];
+        try {
+            const r = await fetch('/api/creators?t=' + Date.now(), { cache: 'no-store' });
+            const d = await r.json();
+            if (Array.isArray(d)) creators = d.filter((c: any) => c?.address && c.address !== address);
+        } catch {}
+
+        // Fallback pool of obviously-demo creator addresses (deterministic,
+        // not real users — so no one gets surprise dust tips).
+        const DEMO_CREATORS: Array<{ address: string; name: string }> = [
+            { address: '0xD8dA6BF26964aF9D7eEd9e03E53415D37aA96045', name: 'vitalik.eth' },
+            { address: '0xb4B46BdAA835F8E4b4D8E208B6559cD267851051', name: '@artist1' },
+            { address: '0x0F2a9F2D7E25bA0E1fF5F6e5C1A8D2B3e4f5c6d7', name: '@writer2' },
+            { address: '0xCC5e1E0D0B4a1a8d2A7E3C5B4B9E6F1A2B3C4D5E', name: '@creator3' },
+        ];
+        const pool: Array<{ address: string; name?: string }> = (creators.length > 0)
+            ? creators
+            : DEMO_CREATORS;
+        const pick = (i: number) => pool[i % pool.length];
+
+        const flatItems: Array<{ id: string; receiver: string; amount: string; label: string; receiverName?: string }> = [];
+        NANO_ITEMS.forEach((it, idx) => {
             if (it.id === 'batch') {
                 for (let i = 0; i < 10; i++) {
-                    flatItems.push({ id: `batch-${i}`, receiver: PLATFORM_TREASURY, amount: '0.001', label: `nano-tip ${i + 1}/10` });
+                    const r = pick(idx * 10 + i);
+                    flatItems.push({ id: `batch-${i}`, receiver: r.address, amount: '0.001', label: `nano-tip ${i + 1}/10 → ${r.name ?? r.address.slice(0, 8)}`, receiverName: r.name });
                 }
             } else {
-                flatItems.push({ id: it.id, receiver: PLATFORM_TREASURY, amount: it.amount, label: it.label });
+                const r = pick(idx);
+                flatItems.push({ id: it.id, receiver: r.address, amount: it.amount, label: `${it.label} → ${r.name ?? r.address.slice(0, 8)}`, receiverName: r.name });
             }
-        }
+        });
 
         const batchRef = `gateway:${address}:${Date.now()}`;
         let recordedCount = 0;
@@ -179,19 +207,24 @@ export default function DemoPage() {
         for (const it of NANO_ITEMS) {
             updateStep(it.id, { status: 'running' });
             await new Promise(r => setTimeout(r, 300));
+            // Pull the recipient for this step from flatItems (first entry for
+            // non-batch, or the first of 10 for the batch step so the card
+            // shows a concrete recipient rather than treasury).
+            const itemForStep = flatItems.find(f => f.id === it.id || f.id === `batch-0`);
             const settlement: SettlementDetail = {
                 from: address as string,
-                to: PLATFORM_TREASURY,
+                to: itemForStep?.receiver ?? PLATFORM_TREASURY,
+                toName: itemForStep?.receiverName,
                 amount: it.id === 'batch' ? '0.01' : it.amount,
                 batchRef,
                 timestamp: Date.now(),
             };
             if (it.id === 'batch') {
-                updateStep(it.id, { status: 'done', result: '10/10 debited from Gateway ($0.01 total)', settlement });
+                updateStep(it.id, { status: 'done', result: `10/10 nano-tips split across ${pool.length} creators ($0.01 total)`, settlement });
             } else {
-                updateStep(it.id, { status: 'done', result: `Debited $${it.amount} from Gateway`, settlement });
+                const name = itemForStep?.receiverName ?? `${settlement.to.slice(0, 8)}…`;
+                updateStep(it.id, { status: 'done', result: `Debited $${it.amount} → ${name}`, settlement });
             }
-            // Refresh tx counter mid-animation so the number visibly climbs
             refreshTxCount();
         }
 
